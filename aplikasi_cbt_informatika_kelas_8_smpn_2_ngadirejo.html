@@ -1,0 +1,1959 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CBT INFORMATIKA VIII - SMP Negeri 2 Ngadirejo</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#10b981',
+                            600: '#059669',
+                            800: '#065f46',
+                            900: '#022c22',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        /* Style untuk cetak PDF/Print */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            .print-only {
+                display: block !important;
+            }
+            body {
+                background: white;
+                color: black;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col justify-between antialiased selection:bg-indigo-200">
+
+    <!-- HEADER RESMI CBT -->
+    <header class="bg-gradient-to-r from-indigo-900 via-slate-900 to-blue-900 text-white shadow-md sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center border border-white/20 backdrop-blur-sm">
+                    <i class="fa-solid fa-graduation-cap text-amber-400 text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-base md:text-lg tracking-wide uppercase leading-tight">SMP NEGERI 2 NGADIREJO</h1>
+                    <p class="text-xs text-indigo-200 font-medium">Laboratorium Komputer SMP Negeri 2 Ngadirejo</p>
+                </div>
+            </div>
+
+            <!-- Real-time Clock & Status Controls -->
+            <div class="flex items-center space-x-4 text-xs md:text-sm">
+                <div class="hidden sm:flex flex-col items-end border-r border-white/20 pr-4">
+                    <span class="text-indigo-300 font-semibold" id="current-date">-- --- ----</span>
+                    <span class="font-mono font-bold text-amber-300" id="realtime-clock">00:00:00 WIB</span>
+                </div>
+                <div id="exam-timer-container" class="hidden flex items-center bg-rose-500/20 border border-rose-400/40 px-3 py-1.5 rounded-lg">
+                    <i class="fa-regular fa-clock mr-2 text-rose-300 animate-pulse"></i>
+                    <div>
+                        <div class="text-[10px] text-rose-200 uppercase font-semibold">Sisa Waktu</div>
+                        <div id="countdown-timer" class="font-mono font-extrabold text-white text-base">90:00</div>
+                    </div>
+                </div>
+                <div id="violation-badge" class="hidden bg-amber-500/20 border border-amber-400/40 px-3 py-1.5 rounded-lg text-amber-200 text-xs">
+                    <i class="fa-solid fa-triangle-exclamation mr-1"></i> Pelanggaran: <span id="violation-count" class="font-bold">0</span>/3
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTAINER UTAMA -->
+    <main class="max-w-7xl mx-auto w-full px-3 md:px-6 py-6 flex-grow">
+
+        <!-- 1. HALAMAN LOGIN / DATA SISWA -->
+        <section id="screen-login" class="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+            <div class="bg-gradient-to-r from-indigo-700 to-blue-800 px-6 py-6 text-white text-center relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 opacity-10 text-9xl"><i class="fa-solid fa-network-wired"></i></div>
+                <h2 class="text-2xl md:text-3xl font-extrabold mb-1">CBT INFORMATIKA KELAS VIII</h2>
+                <p class="text-indigo-100 text-sm">Oleh : Budi Winarno, S.Kom.</p>
+            </div>
+
+            <form id="form-login" onsubmit="startExam(event)" class="p-6 md:p-8 space-y-6">
+                <!-- Data Peserta -->
+                <div class="space-y-4">
+                    <h3 class="text-base font-bold text-slate-700 border-b pb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-user-gear text-indigo-600"></i> Identitas Peserta Ujian
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Lengkap Siswa <span class="text-rose-500">*</span></label>
+                            <input type="text" id="student-name" required placeholder="Masukkan nama lengkap Anda..."
+                                class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Kelas <span class="text-rose-500">*</span></label>
+                            <select id="student-class" required
+                                class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition text-sm bg-white">
+                                <option value="">-- Pilih Kelas --</option>
+                                <option value="VIII A">VIII A</option>
+                                <option value="VIII B">VIII B</option>
+                                <option value="VIII C">VIII C</option>
+                                <option value="VIII D">VIII D</option>
+                                <option value="VIII E">VIII E</option>
+                                <option value="VIII F">VIII F</option>
+                                <option value="VIII G">VIII G</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Nomor Absen <span class="text-rose-500">*</span></label>
+                            <input type="number" id="student-absent" min="1" max="50" required placeholder="Contoh: 12"
+                                class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aturan Ujian -->
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs md:text-sm text-amber-900 space-y-2">
+                    <div class="font-bold flex items-center gap-2 text-amber-800">
+                        <i class="fa-solid fa-shield-halved"></i> Tata Tertib & Ketentuan CBT:
+                    </div>
+                    <ul class="list-disc list-inside space-y-1 text-slate-700 leading-relaxed">
+                        <li>Jumlah soal: <strong>50 soal acak</strong> (40 Pilihan Ganda Reguler & 10 Pilihan Ganda HOTS) dari 60 bank soal.</li>
+                        <li>Durasi maksimal pengerjaan: <strong>90 Menit</strong>.</li>
+                        <li>Tombol <strong>"Selesai & Kumpulkan"</strong> baru aktif setelah ujian berjalan minimal <strong>20 Menit</strong>.</li>
+                        <li><strong>Dilarang keluar dari layar penuh (Fullscreen) atau membuka tab/aplikasi lain</strong>. Sistem mencatat pelanggaran otomatis. Pelanggaran ke-3 dihentikan secara otomatis!</li>
+                        <li>Kriteria Ketuntasan Tujuan Pembelajaran (KKTP): <strong>80</strong>.</li>
+                    </ul>
+                </div>
+
+                <div class="flex items-center justify-between pt-2">
+                    <button type="button" onclick="showSavedResultsModal()" class="text-xs text-indigo-600 hover:text-indigo-800 font-semibold underline flex items-center gap-1">
+                        <i class="fa-solid fa-database"></i> Lihat Rekap Nilai Tersimpan
+                    </button>
+                    <button type="submit" class="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition transform active:scale-95 flex items-center gap-2 text-sm">
+                        <i class="fa-solid fa-right-to-bracket"></i> Mulai Ujian (Mode Fullscreen)
+                    </button>
+                </div>
+            </form>
+        </section>
+
+
+        <!-- 2. HALAMAN LEMBAR UJIAN (EXAM SCREEN) -->
+        <section id="screen-exam" class="hidden grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+            <!-- Area Soal (3 Kolom) -->
+            <div class="lg:col-span-3 space-y-4">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 md:p-6 space-y-6">
+                    <!-- Info Bar Soal -->
+                    <div class="flex flex-wrap items-center justify-between border-b pb-4 gap-2">
+                        <div class="flex items-center space-x-3">
+                            <span class="bg-indigo-600 text-white font-extrabold px-3.5 py-1.5 rounded-xl text-sm shadow-sm" id="question-number-badge">
+                                Soal 01
+                            </span>
+                            <span id="question-topic-badge" class="bg-slate-100 text-slate-700 text-xs font-semibold px-3 py-1 rounded-lg border border-slate-200">
+                                Berpikir Komputasional
+                            </span>
+                            <span id="question-type-badge" class="bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-lg border border-blue-200">
+                                PG Reguler
+                            </span>
+                        </div>
+                        <div class="text-xs font-medium text-slate-500">
+                            Siswa: <span id="display-student-name" class="font-bold text-slate-800"></span> (<span id="display-student-class"></span>)
+                        </div>
+                    </div>
+
+                    <!-- Teks Soal -->
+                    <div id="question-text" class="text-sm md:text-base text-slate-800 font-medium leading-relaxed">
+                        <!-- Teks soal disuntikkan via JS -->
+                    </div>
+
+                    <!-- Elemen Visual Soal (Tabel / SVG / Code / Chat Mock) -->
+                    <div id="question-visual" class="hidden bg-slate-50 border border-slate-200 rounded-xl p-4 overflow-x-auto">
+                        <!-- Visual disuntikkan via JS -->
+                    </div>
+
+                    <!-- Pilihan Jawaban (A, B, C, D) -->
+                    <div id="options-container" class="space-y-3 pt-2">
+                        <!-- Pilihan disuntikkan via JS -->
+                    </div>
+                </div>
+
+                <!-- Navigasi Bawah Soal -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-wrap items-center justify-between gap-3">
+                    <button onclick="prevQuestion()" id="btn-prev" class="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 font-semibold text-sm transition flex items-center gap-2">
+                        <i class="fa-solid fa-chevron-left"></i> Sebelumnya
+                    </button>
+
+                    <button onclick="toggleDoubtful()" id="btn-doubtful" class="px-5 py-2.5 rounded-xl bg-amber-100 text-amber-800 hover:bg-amber-200 border border-amber-300 font-semibold text-sm transition flex items-center gap-2">
+                        <i class="fa-regular fa-flag"></i> Ragu-Ragu
+                    </button>
+
+                    <button onclick="nextQuestion()" id="btn-next" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm transition flex items-center gap-2">
+                        Selanjutnya <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Panel Navigasi Nomor Soal (1 Kolom) -->
+            <div class="lg:col-span-1 space-y-4">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-4 sticky top-20">
+                    <div class="flex items-center justify-between border-b pb-3">
+                        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-grip"></i> Navigasi Soal
+                        </h3>
+                        <span class="text-xs text-slate-500 font-medium" id="answered-count-text">0 / 50</span>
+                    </div>
+
+                    <!-- Grid Nomor Soal -->
+                    <div id="question-grid" class="grid grid-cols-5 gap-2 max-h-[340px] overflow-y-auto pr-1">
+                        <!-- Tombol grid disuntikkan via JS -->
+                    </div>
+
+                    <!-- Keterangan Warna Grid -->
+                    <div class="pt-2 border-t text-[11px] space-y-1.5 text-slate-600">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3.5 h-3.5 bg-indigo-600 rounded"></span>
+                            <span>Sudah Dijawab</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3.5 h-3.5 bg-amber-400 rounded"></span>
+                            <span>Ragu-Ragu</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3.5 h-3.5 bg-slate-200 rounded"></span>
+                            <span>Belum Dijawab</span>
+                        </div>
+                    </div>
+
+                    <!-- Tombol Kumpulkan Ujian -->
+                    <div class="pt-3">
+                        <button id="btn-finish-exam" onclick="confirmFinishExam()" disabled
+                            class="w-full py-3 px-4 bg-slate-300 text-slate-500 font-bold rounded-xl text-sm shadow transition flex flex-col items-center justify-center cursor-not-allowed">
+                            <span>Selesai & Kumpulkan</span>
+                            <span id="min-time-tooltip" class="text-[10px] font-normal text-slate-500 mt-0.5">Tunggu 20:00 lagi</span>
+                        </button>
+                        <p class="text-[10px] text-slate-400 text-center mt-2">Bypass Guru: <code class="bg-slate-100 px-1 rounded">Ctrl+Shift+G</code></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- 3. HALAMAN HASIL & REKAP EVALUASI -->
+        <section id="screen-result" class="hidden space-y-6 max-w-5xl mx-auto">
+            <div class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+                <div id="result-header-bg" class="p-6 md:p-8 text-white text-center relative">
+                    <div class="inline-block px-4 py-1.5 rounded-full bg-white/20 text-xs font-bold uppercase tracking-wider mb-3 backdrop-blur-sm">
+                        Laporan Hasil Ujian CBT Informatika Kelas VIII
+                    </div>
+                    <h2 class="text-2xl md:text-4xl font-extrabold mb-1" id="result-student-name">--</h2>
+                    <p class="text-sm opacity-90" id="result-student-info">-- | --</p>
+
+                    <!-- Score Badge -->
+                    <div class="my-6 inline-flex flex-col items-center justify-center bg-white text-slate-900 rounded-2xl px-8 py-4 shadow-2xl">
+                        <span class="text-xs text-slate-500 font-bold uppercase tracking-wider">Skor Akhir Ujian</span>
+                        <span class="text-5xl md:text-6xl font-black my-1" id="result-score-number">0</span>
+                        <span id="result-status-badge" class="px-3 py-1 rounded-full text-xs font-extrabold uppercase">--</span>
+                    </div>
+
+                    <p class="text-xs text-white/90 max-w-lg mx-auto" id="result-kktp-message">--</p>
+                </div>
+
+                <!-- Statistik Rincian -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 p-6 bg-slate-50 border-b border-slate-200 text-center">
+                    <div class="bg-white p-3 rounded-xl border border-slate-200">
+                        <span class="text-xs text-slate-500 font-medium">Jawaban Benar</span>
+                        <p class="text-xl font-bold text-emerald-600" id="stat-correct">0 / 50</p>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl border border-slate-200">
+                        <span class="text-xs text-slate-500 font-medium">Jawaban Salah</span>
+                        <p class="text-xl font-bold text-rose-600" id="stat-wrong">0 / 50</p>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl border border-slate-200">
+                        <span class="text-xs text-slate-500 font-medium">Waktu Tempuh</span>
+                        <p class="text-xl font-bold text-indigo-600" id="stat-time">0m 0s</p>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl border border-slate-200">
+                        <span class="text-xs text-slate-500 font-medium">Pelanggaran CBT</span>
+                        <p class="text-xl font-bold text-amber-600" id="stat-violations">0 / 3</p>
+                    </div>
+                </div>
+
+                <!-- Rekap Capaian Per Elemen CP & Tipe Soal -->
+                <div class="p-6 space-y-4">
+                    <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie text-indigo-600"></i> Capaian Berdasarkan Capaian Pembelajaran (CP) & Level Soal
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="domain-breakdown">
+                        <!-- Disuntikkan via JS -->
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="p-6 bg-slate-100 border-t border-slate-200 flex flex-wrap gap-3 justify-center md:justify-between items-center no-print">
+                    <div class="flex gap-2 flex-wrap">
+                        <button onclick="window.print()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-semibold text-xs transition flex items-center gap-2 shadow">
+                            <i class="fa-solid fa-print"></i> Cetak Bukti PDF
+                        </button>
+                        <button onclick="downloadCSV()" class="px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-semibold text-xs transition flex items-center gap-2 shadow">
+                            <i class="fa-solid fa-file-excel"></i> Unduh CSV (Excel)
+                        </button>
+                        <button onclick="downloadJSON()" class="px-4 py-2.5 bg-indigo-700 hover:bg-indigo-800 text-white rounded-xl font-semibold text-xs transition flex items-center gap-2 shadow">
+                            <i class="fa-solid fa-code"></i> Unduh JSON
+                        </button>
+                    </div>
+                    <button onclick="toggleReviewSection()" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-xs transition flex items-center gap-2 shadow">
+                        <i class="fa-solid fa-magnifying-glass"></i> <span id="btn-toggle-review-text">Lihat Pembahasan Lengkap</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Review / Pembahasan Soal -->
+            <div id="section-review" class="hidden space-y-4">
+                <h3 class="font-extrabold text-slate-800 text-lg flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-indigo-600"></i> Pembahasan Soal & Kunci Jawaban
+                </h3>
+                <div id="review-container" class="space-y-4">
+                    <!-- Dynamic review items disuntikkan via JS -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 no-print">
+        <p>© 2026 SMP Negeri 2 Ngadirejo • Sistem CBT Informatika VIII • Pengampu: Budi Winarno, S.Kom.</p>
+    </footer>
+
+    <!-- MODAL PERINGATAN PELANGGARAN -->
+    <div id="modal-violation" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 text-center space-y-4 border-2 border-rose-500">
+            <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto text-3xl animate-bounce">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-xl font-extrabold text-slate-900">PERINGATAN KECURANGAN!</h3>
+            <p class="text-sm text-slate-600 leading-relaxed">
+                Anda terdeteksi keluar dari layar penuh atau berpindah tab/aplikasi! Kejadian ini telah dicatat otomatis oleh sistem CBT.
+            </p>
+            <div class="bg-rose-50 text-rose-800 text-sm font-bold p-3 rounded-xl border border-rose-200">
+                Jumlah Pelanggaran: <span id="modal-violation-count">1</span> / 3
+            </div>
+            <p class="text-xs text-slate-500">
+                Catatan: Pelanggaran ke-3 akan menghentikan ujian secara paksa dan mengumpulkan jawaban apa adanya.
+            </p>
+            <button onclick="dismissViolationModal()" class="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-sm transition">
+                Kembali ke Fullscreen & Lanjutkan Ujian
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL REKAP NILAI TERSIMPAN LOKAL -->
+    <div id="modal-saved-results" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full p-6 space-y-4 max-h-[85vh] flex flex-col">
+            <div class="flex items-center justify-between border-b pb-3">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-database text-indigo-600"></i> Rekap Nilai Tersimpan di Perangkat Ini
+                </h3>
+                <button onclick="hideSavedResultsModal()" class="text-slate-400 hover:text-slate-600 text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="flex-grow overflow-y-auto">
+                <table class="w-full text-xs text-left text-slate-700 border-collapse">
+                    <thead class="bg-slate-100 uppercase font-semibold text-slate-600 sticky top-0">
+                        <tr>
+                            <th class="p-2.5 border">Tgl / Waktu</th>
+                            <th class="p-2.5 border">Nama Siswa</th>
+                            <th class="p-2.5 border">Kelas</th>
+                            <th class="p-2.5 border">Absen</th>
+                            <th class="p-2.5 border text-center">Skor</th>
+                            <th class="p-2.5 border text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="saved-results-tbody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex justify-between items-center border-t pt-3">
+                <button onclick="clearLocalStorageResults()" class="text-xs text-rose-600 font-semibold hover:underline">
+                    <i class="fa-solid fa-trash"></i> Hapus Semua Rekap Lokal
+                </button>
+                <button onclick="hideSavedResultsModal()" class="px-4 py-2 bg-slate-700 text-white rounded-lg text-xs font-semibold">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- SCRIPT UTAMA CBT INFORMATIKA KELAS VIII -->
+    <script>
+        /* ==========================================================================
+           BANK SOAL COMPREHENSIVE (60 SOAL: 48 REGULER C2/C3 + 12 HOTS C4/C5)
+           Mencakup 100% Kisi-Kisi Informatika Kelas 8 Semester 1
+           ========================================================================== */
+        const QUESTION_BANK = [
+            // 1. BK - VLOOKUP Pencarian Data (C2)
+            {
+                id: 1, domain: "Berpikir Komputasional", type: "REGULAR", cognitive: "C2",
+                visual: `<table class="w-full text-xs text-center border-collapse border border-slate-300">
+                    <tr class="bg-indigo-100 font-bold"><td class="border p-1.5">Sel</td><td class="border p-1.5">A (Kode)</td><td class="border p-1.5">B (Barang)</td><td class="border p-1.5">C (Harga)</td></tr>
+                    <tr><td class="border p-1 bg-slate-100 font-bold">1</td><td class="border p-1">BRG01</td><td class="border p-1">Flashdisk 32GB</td><td class="border p-1">Rp 65.000</td></tr>
+                    <tr><td class="border p-1 bg-slate-100 font-bold">2</td><td class="border p-1">BRG02</td><td class="border p-1">Mouse Wireless</td><td class="border p-1">Rp 45.000</td></tr>
+                    <tr><td class="border p-1 bg-slate-100 font-bold">3</td><td class="border p-1">BRG03</td><td class="border p-1">Keyboard USB</td><td class="border p-1">Rp 85.000</td></tr>
+                </table>`,
+                text: "Pada aplikasi pengolah lembar kerja (Excel/Google Sheets), fungsi yang tepat untuk mencari harga barang berdasarkan kode barang `BRG02` pada rentang tabel `A1:C3` di atas secara vertikal adalah...",
+                options: [
+                    "=VLOOKUP(\"BRG02\", A1:C3, 3, FALSE)",
+                    "=HLOOKUP(\"BRG02\", A1:C3, 2, FALSE)",
+                    "=LOOKUP(\"BRG02\", A1:C3)",
+                    "=SEARCH(\"BRG02\", A1:C3, 3)"
+                ],
+                answer: 0,
+                explanation: "Fungsi VLOOKUP mencari data vertikal berdasarkan kata kunci di kolom pertama (Kode), diikuti range data (A1:C3), nomor indeks kolom pencarian (kolom 3 untuk Harga), dan parameter FALSE (pencarian persis/exact match)."
+            },
+            // 2. BK - HLOOKUP Pencarian Data Horizontal (C2)
+            {
+                id: 2, domain: "Berpikir Komputasional", type: "REGULAR", cognitive: "C2",
+                visual: `<table class="w-full text-xs text-center border-collapse border border-slate-300">
+                    <tr class="bg-slate-200 font-bold"><td class="border p-1">Kode Kelas</td><td class="border p-1">8A</td><td class="border p-1">8B</td><td class="border p-1">8C</td></tr>
+                    <tr><td class="border p-1 font-bold">Wali Kelas</td><td class="border p-1">Pak Budi</td><td class="border p-1">Bu Siti</td><td class="border p-1">Pak Joko</td></tr>
+                </table>`,
+                text: "Jika data disusun secara horizontal menurut baris seperti tabel di atas, fungsi lembar kerja yang digunakan untuk mengambil nama Wali Kelas berdasarkan Kode Kelas adalah...",
+                options: ["HLOOKUP", "VLOOKUP", "INDEX", "COUNTIF"],
+                answer: 0,
+                explanation: "HLOOKUP (Horizontal Lookup) digunakan ketika data referensi disusun secara mendatar (baris)."
+            },
+            // 3. BK - INDEX & MATCH (C3 - HOTS)
+            {
+                id: 3, domain: "Berpikir Komputasional", type: "HOTS", cognitive: "C3",
+                visual: `<table class="w-full text-xs text-center border-collapse border border-slate-300">
+                    <tr class="bg-indigo-100 font-bold"><td class="border p-1">Kolom A (Ruang)</td><td class="border p-1">Kolom B (ID Lab)</td><td class="border p-1">Kolom C (Kapasitas)</td></tr>
+                    <tr><td class="border p-1">Lab Komputer 1</td><td class="border p-1">LAB-01</td><td class="border p-1">40 Unit</td></tr>
+                    <tr><td class="border p-1">Lab Komputer 2</td><td class="border p-1">LAB-02</td><td class="border p-1">36 Unit</td></tr>
+                </table>`,
+                text: "VLOOKUP memiliki keterbatasan tidak bisa mengambil data di sebelah kiri kolom kunci. Formula kombinasi yang fleksibel untuk mengambil Nama Ruang (Kolom A) berdasarkan acuan `LAB-02` (Kolom B) adalah...",
+                options: [
+                    "=INDEX(A1:A3, MATCH(\"LAB-02\", B1:B3, 0))",
+                    "=VLOOKUP(\"LAB-02\", A1:C3, -1, FALSE)",
+                    "=MATCH(INDEX(\"LAB-02\", B1:B3), A1:A3)",
+                    "=LOOKUP_LEFT(\"LAB-02\", B1:B3, A1:A3)"
+                ],
+                answer: 0,
+                explanation: "Kombinasi INDEX(range_hasil, MATCH(kunci, range_kunci, 0)) mampu mencari data secara fleksibel ke arah kiri maupun kanan."
+            },
+            // 4. BK - VLOOKUP Exact Match (C2)
+            {
+                id: 4, domain: "Berpikir Komputasional", type: "REGULAR", cognitive: "C2",
+                text: "Pada argumen terakhir fungsi `=VLOOKUP(lookup_value, table_array, col_index_num, [range_lookup])`, penggunaan nilai `FALSE` atau `0` bertujuan untuk...",
+                options: [
+                    "Memastikan hasil pencarian harus benar-benar cocok dan presisi (Exact Match).",
+                    "Membuat pencarian secara mendekati (Approximate Match).",
+                    "Mengurutkan tabel secara otomatis dari A ke Z.",
+                    "Mengabaikan data yang bernilai nol atau kosong."
+                ],
+                answer: 0,
+                explanation: "Nilai `FALSE` atau `0` pada range_lookup mewajibkan VLOOKUP mencari pencocokan persis (exact match)."
+            },
+            // 5. BK - Peringkasan Data SUMIF (C2)
+            {
+                id: 5, domain: "Berpikir Komputasional", type: "REGULAR", cognitive: "C2",
+                visual: `<table class="w-full text-xs text-center border-collapse border border-slate-300">
+                    <tr class="bg-slate-200 font-bold"><td class="border p-1">Siswa</td><td class="border p-1">Jenis Kelamin</td><td class="border p-1">Nilai Ujian</td></tr>
+                    <tr><td class="border p-1">Andi</td><td class="border p-1">L</td><td class="border p-1">85</td></tr>
+                    <tr><td class="border p-1">Beti</td><td class="border p-1">P</td><td class="border p-1">90</td></tr>
+                    <tr><td class="border p-1">Candra</td><td class="border p-1">L</td><td class="border p-1">75</td></tr>
+                </table>`,
+                text: "Formula yang digunakan untuk menjumlahkan total Nilai Ujian khusus untuk siswa laki-laki (`L`) pada data di atas adalah...",
+                options: [
+                    "=SUMIF(B2:B4, \"L\", C2:C4)",
+                    "=COUNTIF(B2:B4, \"L\")",
+                    "=AVERAGEIF(B2:B4, \"L\", C2:C4)",
+                    "=SUM(C2:C4)"
+                ],
+                answer: 0,
+                explanation: "SUMIF(range_kriteria, kriteria, range_jumlah) menjumlahkan sel dalam range_jumlah berdasarkan kriteria tertentu."
+            },
+            // 6. BK - Peringkasan Data COUNTIF (C2)
+            {
+                id: 6, domain: "Analisis Data", type: "REGULAR", cognitive: "C2",
+                text: "Bapak Budi Winarno, S.Kom. ingin menghitung **banyaknya siswa** kelas VIII A yang memperoleh Nilai Informatika di atas atau sama dengan KKTP (`>=80`). Fungsi yang paling tepat digunakan adalah...",
+                options: [
+                    "=COUNTIF(Nilai, \">=80\")",
+                    "=SUMIF(Nilai, \">=80\")",
+                    "=AVERAGEIF(Nilai, \">=80\")",
+                    "=MAXIF(Nilai, \">=80\")"
+                ],
+                answer: 0,
+                explanation: "COUNTIF digunakan untuk menghitung banyaknya sel (frekuensi data) yang memenuhi kriteria tertentu."
+            },
+            // 7. BK - AVERAGEIF (C3)
+            {
+                id: 7, domain: "Berpikir Komputasional", type: "REGULAR", cognitive: "C3",
+                visual: `<table class="w-full text-xs text-center border-collapse border border-slate-300">
+                    <tr class="bg-indigo-100 font-bold"><td class="border p-1">Kelas</td><td class="border p-1">Nilai</td></tr>
+                    <tr><td class="border p-1">8A</td><td class="border p-1">80</td></tr>
+                    <tr><td class="border p-1">8A</td><td class="border p-1">90</td></tr>
+                    <tr><td class="border p-1">8B</td><td class="border p-1">70</td></tr>
+                </table>`,
+                text: "Berapakah nilai yang dihasilkan oleh perintah `=AVERAGEIF(A2:A4, \"8A\", B2:B4)` berdasarkan tabel data di atas?",
+                options: ["85", "80", "90", "240"],
+                answer: 0,
+                explanation: "Nilai kelas 8A adalah 80 dan 90. Rata-rata = (80 + 90) / 2 = 85."
+            },
+            // 8. BK - Keuntungan Pivot Table (C2)
+            {
+                id: 8, domain: "Berpikir Komputasional", type: "REGULAR", cognitive: "C2",
+                visual: `<svg viewBox="0 0 320 100" class="w-full max-w-xs mx-auto">
+                    <rect x="10" y="20" width="90" height="70" fill="#e0effe" stroke="#0284c7" rx="6"/>
+                    <text x="55" y="45" font-size="10" text-anchor="middle" font-weight="bold">Data Ribuan Baris</text>
+                    <text x="55" y="60" font-size="9" text-anchor="middle">(Data Mentah)</text>
+                    <path d="M 110 50 L 150 50" stroke="#0284c7" stroke-width="2" marker-end="url(#arrow)"/>
+                    <rect x="160" y="20" width="140" height="70" fill="#dcfce7" stroke="#16a34a" rx="6"/>
+                    <text x="230" y="45" font-size="10" text-anchor="middle" font-weight="bold">Pivot Table</text>
+                    <text x="230" y="60" font-size="9" text-anchor="middle">Ringkasan Interaktif</text>
+                </svg>`,
+                text: "Manakah yang merupakan keuntungan utama dari penggunaan fitur **Pivot Table** pada pengolah lembar kerja?",
+                options: [
+                    "Dapat merangkum, menganalisis, mengelompokkan, dan mengeksplorasi data dalam jumlah besar secara cepat dan interaktif tanpa merusak data asli.",
+                    "Mengubah sistem operasi komputer menjadi lebih cepat secara otomatis.",
+                    "Menghapus baris data yang kosong secara permanen dari harddisk.",
+                    "Mengunci dokumen agar tidak bisa dibuka oleh orang lain."
+                ],
+                answer: 0,
+                explanation: "Pivot Table adalah fitur canggih spreadsheet untuk meringkas dan menguji hubungan antar data dalam jumlah besar secara fleksibel."
+            },
+            // 9. BK - Pivot Table Rekap (C4 - HOTS)
+            {
+                id: 9, domain: "Berpikir Komputasional", type: "HOTS", cognitive: "C4",
+                visual: `<table class="w-full text-xs text-center border-collapse border border-slate-300">
+                    <tr class="bg-amber-100 font-bold"><td class="border p-1">Bulan</td><td class="border p-1">Kategori</td><td class="border p-1">Penjualan</td></tr>
+                    <tr><td class="border p-1">Januari</td><td class="border p-1">Laptop</td><td class="border p-1">10 Unit</td></tr>
+                    <tr><td class="border p-1">Januari</td><td class="border p-1">Printer</td><td class="border p-1">5 Unit</td></tr>
+                    <tr><td class="border p-1">Februari</td><td class="border p-1">Laptop</td><td class="border p-1">15 Unit</td></tr>
+                </table>`,
+                text: "Jika seorang analis data meletakkan field 'Kategori' di bagian *Rows* dan 'Bulan' di bagian *Columns* pada Pivot Table, maka tampilan ringkasan yang terbentuk adalah...",
+                options: [
+                    "Tabel dua dimensi silang yang menampilkan total penjualan setiap jenis barang per bulan.",
+                    "Grafik lingkaran yang hanya menampilkan total penjualan barang bulan Januari.",
+                    "Daftar urut nama barang dari A sampai Z secara vertikal saja.",
+                    "Data barang terhapus secara otomatis."
+                ],
+                answer: 0,
+                explanation: "Menempatkan satu field di Rows dan field lain di Columns membentuk matriks crosstabulation (tabel silang) interaktif."
+            },
+            // 10. BK - Konsep Mesin Fungsi (C2)
+            {
+                id: 10, domain: "Berpikir Komputasional", type: "REGULAR", cognitive: "C2",
+                visual: `<svg viewBox="0 0 360 90" class="w-full max-w-sm mx-auto">
+                    <rect x="10" y="25" width="80" height="40" rx="8" fill="#e2e8f0" stroke="#475569" stroke-width="2"/>
+                    <text x="50" y="49" font-size="11" text-anchor="middle" font-weight="bold">Input (x)</text>
+                    <path d="M 95 45 L 135 45" stroke="#475569" stroke-width="2"/>
+                    <rect x="140" y="15" width="100" height="60" rx="8" fill="#6366f1" stroke="#3730a3" stroke-width="2"/>
+                    <text x="190" y="42" font-size="11" fill="white" text-anchor="middle" font-weight="bold">Mesin Fungsi</text>
+                    <text x="190" y="58" font-size="10" fill="#fef08a" text-anchor="middle">f(x) = 3x - 2</text>
+                    <path d="M 245 45 L 285 45" stroke="#475569" stroke-width="2"/>
+                    <rect x="290" y="25" width="60" height="40" rx="8" fill="#bbf7d0" stroke="#16a34a" stroke-width="2"/>
+                    <text x="320" y="49" font-size="11" text-anchor="middle" font-weight="bold">Output</text>
+                </svg>`,
+                text: "Berdasarkan ilustrasi Mesin Komputasi Fungsi $f(x) = 3x - 2$ di atas, jika masukan (**Input $x$**) yang dimasukkan adalah **5**, berapakah keluaran (**Output**) yang dihasilkan?",
+                options: ["13", "15", "10", "17"],
+                answer: 0,
+                explanation: "$f(5) = (3 \\times 5) - 2 = 15 - 2 = 13$."
+            },
+            // 11. BK - Konsep Fungsi Matematika (C2)
+            {
+                id: 11, domain: "Berpikir Komputasional", type: "REGULAR", cognitive: "C2",
+                text: "Dalam konsep komputasi, sebuah **Fungsi** dapat dianalogikan sebagai mesin otomatis yang menerima input, memproses data sesuai aturan tertentu, lalu menghasilkan output. Syarat utama sebuah fungsi yang valid adalah...",
+                options: [
+                    "Setiap satu nilai input harus menghasilkan tepat satu nilai output yang pasti.",
+                    "Satu nilai input boleh menghasilkan banyak output secara acak.",
+                    "Fungsi tidak boleh menggunakan angka matematika.",
+                    "Output fungsi harus selalu bernilai nol."
+                ],
+                answer: 0,
+                explanation: "Definisi relasi fungsi memetakan setiap anggota himpunan input (domain) ke tepat satu anggota himpunan output (kodomain)."
+            },
+            // 12. BK - Konsep Himpunan (C2)
+            {
+                id: 12, domain: "Berpikir Komputasional", type: "REGULAR", cognitive: "C2",
+                text: "Kumpulan objek atau data terstruktur yang terdefinisi dengan jelas dan memiliki keanggotaan tanpa adanya duplikasi elemen dinamakan...",
+                options: ["Himpunan (Set)", "Algoritma", "Variabel", "Array Multidimensi"],
+                answer: 0,
+                explanation: "Himpunan (Set) dalam informatika adalah koleksi objek diskrit berstruktur tanpa urutan dan tanpa elemen ganda."
+            },
+            // 13. BK - Diagram Venn Irisan (C3)
+            {
+                id: 13, domain: "Berpikir Komputasional", type: "REGULAR", cognitive: "C3",
+                visual: `<svg viewBox="0 0 300 120" class="w-full max-w-xs mx-auto">
+                    <circle cx="110" cy="60" r="45" fill="#3b82f6" fill-opacity="0.4" stroke="#1d4ed8" stroke-width="2"/>
+                    <circle cx="190" cy="60" r="45" fill="#ec4899" fill-opacity="0.4" stroke="#be185d" stroke-width="2"/>
+                    <text x="80" y="64" font-size="11" font-weight="bold">Koding</text>
+                    <text x="220" y="64" font-size="11" font-weight="bold">Desain</text>
+                    <text x="150" y="64" font-size="10" font-weight="bold" fill="#0f172a" text-anchor="middle">5 Siswa</text>
+                </svg>`,
+                text: "Pada diagram Venn di atas, wilayah tengah yang beririsan menunjukkan 5 siswa yang menyukai ekstrakurikuler Koding sekaligus Desain. Dalam operasi himpunan, wilayah irisan tersebut dinotasikan sebagai...",
+                options: [
+                    "Irisan (Intersection / $A \\cap B$)",
+                    "Gabungan (Union / $A \\cup B$)",
+                    "Komplemen ($A'$)",
+                    "Selisih ($A - B$)"
+                ],
+                answer: 0,
+                explanation: "Irisan (Intersection / $A \\cap B$) menyatakan himpunan elemen yang menjadi anggota himpunan A sekaligus himpunan B."
+            },
+            // 14. BK - Diagram Venn Gabungan (C2)
+            {
+                id: 14, domain: "Berpikir Komputasional", type: "REGULAR", cognitive: "C2",
+                text: "Diketahui himpunan siswa klub Komputer $A = \\{Andi, Budi, Cici\\}$ dan klub Robotik $B = \\{Cici, Dian, Eka\\}$. Anggota dari himpunan **Gabungan** ($A \\cup B$) adalah...",
+                options: [
+                    "\\{Andi, Budi, Cici, Dian, Eka\\}",
+                    "\\{Cici\\}",
+                    "\\{Andi, Budi\\}",
+                    "\\{Dian, Eka\\}"
+                ],
+                answer: 0,
+                explanation: "Gabungan ($A \\cup B$) menggabungkan seluruh elemen kedua himpunan tanpa mengulang elemen yang sama (Cici hanya ditulis 1 kali)."
+            },
+            // 15. BK - Diagram Venn Selisih (C4 - HOTS)
+            {
+                id: 15, domain: "Berpikir Komputasional", type: "HOTS", cognitive: "C4",
+                text: "Di kelas VIII B terdapat 32 siswa. 20 siswa menyukai spreadsheet, 15 siswa menyukai pemrograman, dan 8 siswa menyukai keduanya. Berapakah jumlah siswa yang **hanya menyukai spreadsheet saja** (tidak menyukai pemrograman)?",
+                options: ["12 siswa", "20 siswa", "7 siswa", "5 siswa"],
+                answer: 0,
+                explanation: "Siswa hanya menyukai spreadsheet (Selisih A - B) = Total penyuka spreadsheet - Penyuka keduanya = 20 - 8 = 12 siswa."
+            },
+            // 16. BK - Sistem Bilangan Desimal ke Biner (C2)
+            {
+                id: 16, domain: "Berpikir Komputasional", type: "REGULAR", cognitive: "C2",
+                visual: `<table class="w-full text-xs text-center border-collapse border border-slate-300 max-w-xs mx-auto">
+                    <tr class="bg-slate-200 font-bold"><td class="border p-1">Desimal</td><td class="border p-1">Biner (8-bit)</td></tr>
+                    <tr><td class="border p-1">13</td><td class="border p-1 font-mono font-bold text-indigo-600">0000 1101</td></tr>
+                </table>`,
+                text: "Sistem bilangan biner menggunakan basis 2 (angka 0 dan 1). Berapakah nilai konversi bilangan desimal **25** ke dalam bentuk biner?",
+                options: ["11001", "10101", "11100", "10011"],
+                answer: 0,
+                explanation: "25 = 16 + 8 + 1 = $2^4 + 2^3 + 2^0$ = 11001 dalam biner."
+            },
+            // 17. BK - Sistem Bilangan Biner ke Desimal (C2)
+            {
+                id: 17, domain: "Berpikir Komputasional", type: "REGULAR", cognitive: "C2",
+                visual: `<div class="flex justify-center space-x-2 font-mono text-sm font-bold my-1">
+                    <span class="bg-indigo-600 text-white px-2 py-1 rounded">1</span>
+                    <span class="bg-indigo-600 text-white px-2 py-1 rounded">0</span>
+                    <span class="bg-indigo-600 text-white px-2 py-1 rounded">1</span>
+                    <span class="bg-indigo-600 text-white px-2 py-1 rounded">0</span>
+                </div>`,
+                text: "Berapakah nilai desimal dari kode biner `1010` di atas?",
+                options: ["10", "12", "8", "14"],
+                answer: 0,
+                explanation: "1010 (biner) = $(1 \\times 2^3) + (0 \\times 2^2) + (1 \\times 2^1) + (0 \\times 2^0) = 8 + 0 + 2 + 0 = 10$."
+            },
+            // 18. BK - Sistem Bilangan Heksadesimal (C2)
+            {
+                id: 18, domain: "Berpikir Komputasional", type: "REGULAR", cognitive: "C2",
+                text: "Sistem bilangan berbasis 16 yang menggunakan angka 0-9 dan huruf A-F dinamakan sistem bilangan... (Di mana huruf 'A' mewakili angka 10).",
+                options: ["Heksadesimal", "Oktal", "Biner", "Desimal"],
+                answer: 0,
+                explanation: "Sistem bilangan Heksadesimal berbasis 16 (0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F)."
+            },
+            // 19. BK - Sistem Bilangan Oktal (C2)
+            {
+                id: 19, domain: "Berpikir Komputasional", type: "REGULAR", cognitive: "C2",
+                text: "Sistem bilangan Oktal berbasis 8 menggunakan kombinasi simbol angka...",
+                options: ["0 sampai 7", "0 sampai 8", "1 sampai 8", "0 dan 1 saja"],
+                answer: 0,
+                explanation: "Sistem bilangan oktal hanya memiliki 8 simbol angka yaitu: 0, 1, 2, 3, 4, 5, 6, dan 7."
+            },
+            // 20. BK - Konversi Masalah Nyata (C4 - HOTS)
+            {
+                id: 20, domain: "Berpikir Komputasional", type: "HOTS", cognitive: "C4",
+                visual: `<div class="bg-slate-900 text-green-400 p-3 rounded-lg text-xs font-mono text-center">
+                    Sakelar Lampu Lab (8-Bit): [ 1 | 1 | 0 | 0 | 0 | 0 | 0 | 1 ]
+                </div>`,
+                text: "Sebuah panel kontrol lab komputer menggunakan kode biner 8-bit untuk menyalakan sakelar lampu (1 = menyala, 0 = padam). Jika lampu nomor 1, 2, dan 8 menyala (kode: `11000001`), berapakah nilai desimal yang merepresentasikan status sakelar tersebut?",
+                options: ["193", "195", "129", "255"],
+                answer: 0,
+                explanation: "`11000001` = $128 + 64 + 1 = 193$ desimal."
+            },
+            // 21. BK - Tumpukan Stack LIFO (C3)
+            {
+                id: 21, domain: "Berpikir Komputasional", type: "REGULAR", cognitive: "C3",
+                visual: `<svg viewBox="0 0 200 130" class="w-full max-w-xs mx-auto">
+                    <rect x="50" y="10" width="100" height="110" fill="none" stroke="#475569" stroke-width="3" rx="4"/>
+                    <rect x="55" y="85" width="90" height="25" fill="#3b82f6" rx="4"/><text x="100" y="102" font-size="10" fill="white" text-anchor="middle" font-weight="bold">Buku A (Bawah)</text>
+                    <rect x="55" y="55" width="90" height="25" fill="#10b981" rx="4"/><text x="100" y="72" font-size="10" fill="white" text-anchor="middle" font-weight="bold">Buku B</text>
+                    <rect x="55" y="25" width="90" height="25" fill="#f59e0b" rx="4"/><text x="100" y="42" font-size="10" fill="white" text-anchor="middle" font-weight="bold">Buku C (Atas)</text>
+                </svg>`,
+                text: "Perhatikan gambar tumpukan buku di dalam kardus di atas. Prinsip kerja struktur data **Stack** yang diterapkan saat mengambil buku tersebut adalah...",
+                options: [
+                    "LIFO (Last In, First Out) - Buku yang terakhir ditumpuk (Buku C) akan menjadi yang pertama kali diambil.",
+                    "FIFO (First In, First Out) - Buku yang pertama ditumpuk (Buku A) akan menjadi yang pertama diambil.",
+                    "Random Access - Semua buku dapat diambil bersamaan secara bebas.",
+                    "Priority Queue - Buku paling tebal diambil dahulu."
+                ],
+                answer: 0,
+                explanation: "Stack (Tumpukan) menganut prinsip LIFO (Last In First Out), di mana data terakhir yang masuk adalah yang pertama kali keluar."
+            },
+            // 22. BK - Antrean Queue FIFO (C3)
+            {
+                id: 22, domain: "Berpikir Komputasional", type: "REGULAR", cognitive: "C3",
+                visual: `<svg viewBox="0 0 320 80" class="w-full max-w-xs mx-auto">
+                    <rect x="230" y="20" width="70" height="40" fill="#0284c7" rx="6"/>
+                    <text x="265" y="44" font-size="10" fill="white" text-anchor="middle" font-weight="bold">Loket Kasir</text>
+                    <circle cx="180" cy="40" r="14" fill="#6366f1"/><text x="180" y="44" font-size="9" fill="white" text-anchor="middle">Orang 1</text>
+                    <circle cx="130" cy="40" r="14" fill="#6366f1"/><text x="130" y="44" font-size="9" fill="white" text-anchor="middle">Orang 2</text>
+                    <circle cx="80" cy="40" r="14" fill="#6366f1"/><text x="80" y="44" font-size="9" fill="white" text-anchor="middle">Orang 3</text>
+                    <path d="M 50 40 L 20 40" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+                </svg>`,
+                text: "Prinsip kerja struktur data **Queue (Antrean)** pada cetakan printer atau antrean kasir seperti gambar di atas adalah...",
+                options: [
+                    "FIFO (First In, First Out) - Elemen yang pertama masuk antrean akan dilayani dan keluar pertama kali.",
+                    "LIFO (Last In, First Out) - Elemen terakhir masuk akan dilayani pertama kali.",
+                    "Sorting - Antrean diurutkan berdasarkan tinggi badan.",
+                    "Linear Search - Elemen dicari secara acak."
+                ],
+                answer: 0,
+                explanation: "Queue (Antrean) menganut prinsip FIFO (First In First Out), di mana yang pertama datang adalah yang pertama dilayani."
+            },
+            // 23. BK - Operasi Push & Pop Stack (C4 - HOTS)
+            {
+                id: 23, domain: "Berpikir Komputasional", type: "HOTS", cognitive: "C4",
+                text: "Sebuah Stack kosong melakukan serangkaian operasi berikut: `Push(10)`, `Push(20)`, `Push(30)`, lalu melakukan `Pop()`, dan dilanjutkan `Push(40)`. Elemen yang berada di posisi **paling atas (top)** Stack saat ini adalah...",
+                options: ["40", "30", "20", "10"],
+                answer: 0,
+                explanation: "Awal: [10] -> [10, 20] -> [10, 20, 30]. Pop() menghapus 30 -> sisa [10, 20]. Push(40) -> [10, 20, 40]. Elemen teratas adalah 40."
+            },
+            // 24. BK - Penerapan Queue Kehidupan (C2)
+            {
+                id: 24, domain: "Berpikir Komputasional", type: "REGULAR", cognitive: "C2",
+                text: "Manakah di bawah ini yang merupakan contoh penerapan konsep struktur data **Queue (Antrean)** dalam kehidupan sehari-hari?",
+                options: [
+                    "Antrean pembelian tiket kereta api di stasiun.",
+                    "Tumpukan piring kotor yang siap dicuci di dapur.",
+                    "Fungsi Undo (Ctrl+Z) pada Microsoft Word.",
+                    "Riwayat tombol Back pada browser web."
+                ],
+                answer: 0,
+                explanation: "Antrean tiket kereta api menganut FIFO (Queue). Tumpukan piring dan Undo menganut LIFO (Stack)."
+            },
+            // 25. BK - Parameter Range Formula (C2)
+            {
+                id: 25, domain: "Berpikir Komputasional", type: "REGULAR", cognitive: "C2",
+                text: "Penulisan simbol rentang sel (range) dari sel A1 sampai dengan sel D10 pada rumus spreadsheet yang benar adalah...",
+                options: ["A1:D10", "A1-D10", "A1..D10", "A1;D10"],
+                answer: 0,
+                explanation: "Simbol titik dua (`:`) digunakan untuk menentukan rentang/range sel pada spreadsheet."
+            },
+            // 26. BK - SUMIFS Multi Kriteria (C4 - HOTS)
+            {
+                id: 26, domain: "Berpikir Komputasional", type: "HOTS", cognitive: "C4",
+                visual: `<table class="w-full text-xs text-center border-collapse border border-slate-300">
+                    <tr class="bg-indigo-100 font-bold"><td class="border p-1">Kelas</td><td class="border p-1">Gender</td><td class="border p-1">Nilai</td></tr>
+                    <tr><td class="border p-1">8A</td><td class="border p-1">L</td><td class="border p-1">80</td></tr>
+                    <tr><td class="border p-1">8A</td><td class="border p-1">P</td><td class="border p-1">90</td></tr>
+                    <tr><td class="border p-1">8A</td><td class="border p-1">L</td><td class="border p-1">85</td></tr>
+                </table>`,
+                text: "Untuk menjumlahkan Nilai siswa kelas '8A' yang berjenis kelamin 'L' (lebih dari 1 kriteria), fungsi pengolah data yang paling tepat adalah...",
+                options: ["SUMIFS", "SUMIF", "COUNTIF", "AVERAGE"],
+                answer: 0,
+                explanation: "Fungsi SUMIFS digunakan untuk menjumlahkan sel yang memenuhi banyak kriteria (multiple criteria)."
+            },
+            // 27. BK - Gabungan IF & VLOOKUP (C4 - HOTS)
+            {
+                id: 27, domain: "Berpikir Komputasional", type: "HOTS", cognitive: "C4",
+                text: "Pada aplikasi kasir, jika tabel diskon tidak ditemukan, sistem mengeksekusi `=IF(ISNA(VLOOKUP(A2, Tabel, 2, FALSE)), 0, VLOOKUP(A2, Tabel, 2, FALSE))`. Tujuan dari penggunaan logika IF tersebut adalah...",
+                options: [
+                    "Mencegah munculnya pesan error `#N/A` jika kode barang tidak ada dalam tabel dan menggantinya dengan nilai diskon 0.",
+                    "Menghapus seluruh tabel referensi diskon secara otomatis.",
+                    "Mengubah harga barang menjadi gratis.",
+                    "Menutup aplikasi kasir secara mendadak."
+                ],
+                answer: 0,
+                explanation: "Pemeriksaan `ISNA` atau `IFERROR` menangani error pencarian data yang tidak ditemukan agar tampilan spreadsheet tetap rapi."
+            },
+            // 28. BK - Himpunan Semesta (C2)
+            {
+                id: 28, domain: "Berpikir Komputasional", type: "REGULAR", cognitive: "C2",
+                text: "Himpunan yang memuat seluruh objek atau elemen yang sedang dibicarakan dalam suatu topik analisis data disebut...",
+                options: ["Himpunan Semesta (Universal Set / S)", "Himpunan Kosong", "Himpunan Bagian", "Himpunan Bagian Sejati"],
+                answer: 0,
+                explanation: "Himpunan semesta (S) adalah himpunan yang memuat semua elemen yang relevan dengan pembicaraan."
+            },
+            // 29. BK - Konversi Oktal ke Desimal (C2)
+            {
+                id: 29, domain: "Berpikir Komputasional", type: "REGULAR", cognitive: "C2",
+                text: "Nilai konversi dari bilangan oktal **17** ke dalam bilangan desimal adalah... (Petunjuk: $(1 \\times 8^1) + (7 \\times 8^0)$)",
+                options: ["15", "17", "13", "21"],
+                answer: 0,
+                explanation: "$(1 \\times 8) + (7 \\times 1) = 8 + 7 = 15$ desimal."
+            },
+            // 30. BK - Stack Undo Redo (C2)
+            {
+                id: 30, domain: "Berpikir Komputasional", type: "REGULAR", cognitive: "C2",
+                text: "Fitur **Undo (Batal Perintah)** pada software Microsoft Word memanfaatkan struktur data Stack karena...",
+                options: [
+                    "Perubahan perintah terakhir yang diketik user adalah perubahan pertama yang akan dibatalkan (LIFO).",
+                    "Ketikkan paling awal saat membuka dokumen akan dihapus terlebih dahulu.",
+                    "Undo mengurutkan kata sesuai abjad.",
+                    "Undo menyimpan file ke cloud otomatis."
+                ],
+                answer: 0,
+                explanation: "Fungsi Undo menimbun riwayat aksi user dan membatalkan tindakan paling akhir (teratas tumpukan LIFO)."
+            },
+
+            // 31. LD - Rekam Jejak Digital Aktif vs Pasif (C2)
+            {
+                id: 31, domain: "Literasi Digital", type: "REGULAR", cognitive: "C2",
+                visual: `<div class="bg-blue-50 border border-blue-200 p-3 rounded-xl text-xs space-y-2">
+                    <div class="flex items-center space-x-2 text-blue-900 font-bold">
+                        <i class="fa-brands fa-instagram text-lg"></i>
+                        <span>Posting Status Media Sosial</span>
+                    </div>
+                    <p class="text-slate-700">"Sedang liburan bersama keluarga di Candi Borobudur! #Vacation"</p>
+                </div>`,
+                text: "Posting foto, mengunggah komentar, dan mengisi formulir pendaftaran online secara sadar oleh pengguna merupakan contoh dari...",
+                options: [
+                    "Rekam Jejak Digital Aktif (Active Digital Footprint)",
+                    "Rekam Jejak Digital Pasif (Passive Digital Footprint)",
+                    "Cyberbullying Pasif",
+                    "Malware Jaringan"
+                ],
+                answer: 0,
+                explanation: "Jejak digital aktif diciptakan secara sengaja dan disadari oleh pengguna saat mengunggah informasi di dunia digital."
+            },
+            // 32. LD - Dampak Rekam Jejak Digital (C2)
+            {
+                id: 32, domain: "Literasi Digital", type: "REGULAR", cognitive: "C2",
+                text: "Mengapa penting bagi siswa SMP untuk menjaga rekam jejak digital tetap positif di internet?",
+                options: [
+                    "Karena jejak digital bersifat abadi, sulit dihapus sepenuhnya, dan dapat mempengaruhi reputasi serta masa depan akademik/karir.",
+                    "Agar memori HP tidak cepat penuh.",
+                    "Supaya koneksi internet menjadi lebih cepat.",
+                    "Agar akun media sosial tidak terdeteksi oleh guru."
+                ],
+                answer: 0,
+                explanation: "Jejak digital membentuk reputasi online permanen yang dapat diakses oleh siapa saja di masa depan."
+            },
+            // 33. LD - Cara Menjaga Jejak Digital (C3)
+            {
+                id: 33, domain: "Literasi Digital", type: "REGULAR", cognitive: "C3",
+                visual: `<div class="bg-slate-900 text-white p-3 rounded-xl text-xs font-mono space-y-1">
+                    <div class="text-emerald-400 font-bold">[TIPS PRIVASI DIGITAL]</div>
+                    <div>1. Pikirkan sebelum mengunggah (Think before you post)</div>
+                    <div>2. Lindungi data pribadi sensitif (NIK, Alamat, Pass)</div>
+                </div>`,
+                text: "Tindakan bijak di bawah ini yang **TIDAK** mendukung upaya menjaga rekam jejak digital yang positif adalah...",
+                options: [
+                    "Menyebarkan ujaran kebencian (hate speech) menggunakan akun anonim/palsu.",
+                    "Selalu memeriksa ulang kebenaran informasi sebelum membagikannya.",
+                    "Menggunakan pengaturan privasi akun media sosial dengan bijak.",
+                    "Mengunggah konten karya kreatif dan edukatif."
+                ],
+                answer: 0,
+                explanation: "Menyebarkan ujaran kebencian meskipun pakai akun palsu tetap meninggalkan jejak IP dan merusak etika digital."
+            },
+            // 34. LD - Privasi Data Pribadi (C2)
+            {
+                id: 34, domain: "Literasi Digital", type: "REGULAR", cognitive: "C2",
+                text: "Manakah di antara data berikut yang tergolong **Data Pribadi Sensitif** yang DILARANG dipublikasikan secara bebas di media sosial?",
+                options: [
+                    "Nomor Induk Kependudukan (NIK), Nama Ibu Kandung, dan Kata Sandi Akun",
+                    "Nama Panggilan dan Hobi",
+                    "Warna Favorit dan Makanan Kesukaan",
+                    "Judul Buku Pelajaran Informatika"
+                ],
+                answer: 0,
+                explanation: "NIK, nama ibu kandung, dan password adalah data vital perbankan/identitas resmi yang rawan penyalahgunaan."
+            },
+            // 35. LD - Rekam Jejak Pasif (C4 - HOTS)
+            {
+                id: 35, domain: "Literasi Digital", type: "HOTS", cognitive: "C4",
+                text: "Saat Anda mengunjungi sebuah situs berita digital, server secara otomatis mencatat Alamat IP, jenis browser, lokasi geografis, dan riwayat klik (*cookies*) tanpa Anda ketik secara manual. Jejak ini disebut...",
+                options: [
+                    "Rekam Jejak Digital Pasif",
+                    "Rekam Jejak Digital Aktif",
+                    "Pencurian Identitas",
+                    "Algoritma Dekomposisi"
+                ],
+                answer: 0,
+                explanation: "Jejak digital pasif terkumpul secara otomatis di latar belakang tanpa kesadaran langsung pengguna."
+            },
+            // 36. LD - Dampak Media Sosial (C2)
+            {
+                id: 36, domain: "Literasi Digital", type: "REGULAR", cognitive: "C2",
+                text: "Dampak positif dari penggunaan media sosial digital di lingkungan sekolah adalah...",
+                options: [
+                    "Memudahkan kolaborasi belajar kelompok dan berbagi informasi edukatif secara cepat.",
+                    "Menyebabkan ketergantungan game online hingga lupa waktu belajar.",
+                    "Memudahkan siswa untuk saling menjelekkan antar kelas.",
+                    "Menghilangkan kebutuhan buku pelajaran."
+                ],
+                answer: 0,
+                explanation: "Dampak positif media sosial adalah sarana komunikasi cepat, ruang kreasi, dan jejaring belajar sains/edukasi."
+            },
+            // 37. LD - Netiket Bermedia Digital (C2)
+            {
+                id: 37, domain: "Literasi Digital", type: "REGULAR", cognitive: "C2",
+                visual: `<div class="bg-rose-50 border border-rose-200 p-3 rounded-xl text-xs text-rose-900 space-y-1">
+                    <div class="font-bold flex items-center gap-1"><i class="fa-solid fa-triangle-exclamation"></i> Contoh Netiket Buruk:</div>
+                    <p>"WOII JANGAN SOK PINTAR KAU YA!!! BALAS PESAN SEKARANG!!!" (Memakai Huruf Kapital Semua)</p>
+                </div>`,
+                text: "Dalam etika komunikasi digital (Netiket), mengetik pesan menggunakan **HURUF KAPITAL SEMUA** dianggap tidak sopan karena diartikan sebagai...",
+                options: [
+                    "Berteriak atau marah kepada penerima pesan.",
+                    "Pesan yang sangat penting dan rahasia.",
+                    "Bahasa resmi pemerintah.",
+                    "Tanda bahwa pengirim pesan sedang gembira."
+                ],
+                answer: 0,
+                explanation: "Menulis kalimat dengan huruf kapital seluruhnya (ALL CAPS) dalam etika digital dinilai sebagai ekspresi membentak atau berteriak."
+            },
+            // 38. LD - Ruang Publik Virtual & Hak Cipta (C2)
+            {
+                id: 38, domain: "Literasi Digital", type: "REGULAR", cognitive: "C2",
+                text: "Saat mengambil gambar dari internet untuk keperluan tugas presentasi Informatika, bentuk penghormatan terhadap Hak Cipta pembuat karya adalah...",
+                options: [
+                    "Mencantumkan sumber URL link dan nama pemilik/pencipta gambar.",
+                    "Mengakui gambar tersebut sebagai buatan sendiri.",
+                    "Menghapus watermark pemilik gambar secara paksa.",
+                    "Menjual gambar tersebut kepada teman kelas."
+                ],
+                answer: 0,
+                explanation: "Menyebutkan atribusi/sumber pencipta adalah etika wajib menghargai Hak Kekayaan Intelektual (HKI)."
+            },
+            // 39. LD - Etika Membagikan Karya (C3)
+            {
+                id: 39, domain: "Literasi Digital", type: "REGULAR", cognitive: "C3",
+                text: "Lisensi *Creative Commons (CC)* pada konten digital di internet memberikan izin kepada publik untuk...",
+                options: [
+                    "Menggunakan dan membagikan karya sesuai dengan syarat ketentuan yang ditetapkan oleh penciptanya secara legal.",
+                    "Mengambil alih hak milik karya secara permanen.",
+                    "Menghapus nama pencipta asli dari sejarah internet.",
+                    "Mengunci karya agar tidak bisa dibaca orang lain."
+                ],
+                answer: 0,
+                explanation: "Lisensi Creative Commons adalah lisensi standar terbuka yang memberi izin penggunaan karya dengan kriteria tertentu."
+            },
+            // 40. LD - Ciri-Ciri Berita Hoaks (C2)
+            {
+                id: 40, domain: "Literasi Digital", type: "REGULAR", cognitive: "C2",
+                visual: `<div class="bg-amber-50 border border-amber-300 p-3 rounded-xl text-xs space-y-1 text-amber-950">
+                    <div class="font-bold text-rose-600 uppercase">🚨 VIRALKAN!! SEBARKAN SEBELUM DIHAPUS!!</div>
+                    <p>"Bagi-bagi laptop gratis dari pemerintah cukup klik link berhadiah ini! Sebarkan ke 10 grup!"</p>
+                </div>`,
+                text: "Berdasarkan contoh pesan di atas, ciri khas utama dari berita palsu (**Hoaks**) yang berbahaya adalah...",
+                options: [
+                    "Menggunakan judul provokatif, memicu kepanikan/kesenangan semu, dan mendesak untuk segera disebarkan tanpa sumber jelas.",
+                    "Berasal dari situs resmi domain pemerintah (.go.id).",
+                    "Disertai data statistik dan rilis pers resmi.",
+                    "Menggunakan bahasa yang santun dan netral."
+                ],
+                answer: 0,
+                explanation: "Ciri hoaks: pesan heboh, mendesak viralkan, tidak jelas narasumbernya, serta mengarah ke tautan phishing."
+            },
+            // 41. LD - Membedakan Fakta dan Opini (C2)
+            {
+                id: 41, domain: "Literasi Digital", type: "REGULAR", cognitive: "C2",
+                text: "Manakah di antara kalimat berikut yang merupakan contoh **FAKTA** digital?",
+                options: [
+                    "SMP Negeri 2 Ngadirejo berlokasi di Kabupaten Temanggung, Jawa Tengah.",
+                    "Pelajaran Informatika adalah pelajaran yang paling menyenangkan di dunia.",
+                    "Laptop merek X jauh lebih keren dibanding merek Y.",
+                    "Semua siswa pasti menyukai soal berhitung biner."
+                ],
+                answer: 0,
+                explanation: "Fakta adalah kenyataan objektif yang dapat dibuktikan kebenarannya secara empiris."
+            },
+            // 42. LD - Verifikasi Kredibilitas Sumber (C4 - HOTS)
+            {
+                id: 42, domain: "Literasi Digital", type: "HOTS", cognitive: "C4",
+                text: "Jika Anda menerima kabar mengejutkan tentang perubahan jadwal ujian sekolah di grup chat WhatsApp, langkah **Cek dan Ricek (Fact Checking)** yang paling benar adalah...",
+                options: [
+                    "Mengecek pengumuman resmi di situs web sekolah atau mengonfirmasi langsung kepada Wali Kelas / Guru Budi Winarno, S.Kom.",
+                    "Langsung meneruskan (forward) pesan tersebut ke seluruh grup keluarga.",
+                    "Langsung mempercayai tanpa perlu konfirmasi.",
+                    "Marah-marah di media sosial pribadi."
+                ],
+                answer: 0,
+                explanation: "Verifikasi informasi wajib dilakukan melalui saluran komunikasi resmi lembaga atau pihak berwenang."
+            },
+            // 43. LD - Penanganan Hoaks di Chat (C4 - HOTS)
+            {
+                id: 43, domain: "Literasi Digital", type: "HOTS", cognitive: "C4",
+                visual: `<div class="bg-slate-100 p-3 rounded-xl border border-slate-300 text-xs space-y-2">
+                    <div class="bg-emerald-100 text-emerald-900 p-2 rounded-lg">
+                        <strong>Teman:</strong> "Eh ada kabar sekolah besok libur total karena ada pembagian kuota!"
+                    </div>
+                </div>`,
+                text: "Bagaimana sikap empati dan etika digital yang tepat ketika Anda mengetahui kabar di atas adalah hoaks?",
+                options: [
+                    "Menegurnya dengan sopan di grup disertai bukti tangkapan layar pengumuman resmi bahwa kabar tersebut tidak benar.",
+                    "Mengejek dan menghina teman tersebut bodoh di depan umum.",
+                    "Pura-pura tidak tahu dan ikut menyebarkannya.",
+                    "Out (keluar) dari grup WhatsApp kelas secara mendadak."
+                ],
+                answer: 0,
+                explanation: "Menolak hoaks dilakukan dengan memberikan klarifikasi berbasis bukti secara santun tanpa merendahkan."
+            },
+            // 44. LD - Definisi Cyberbullying (C2)
+            {
+                id: 44, domain: "Literasi Digital", type: "REGULAR", cognitive: "C2",
+                text: "Tindakan perundungan, pelecehan, intimidasi, atau penghinaan yang dilakukan secara sengaja melalui media sosial, aplikasi pesan, atau platform digital dinamakan...",
+                options: ["Cyberbullying (Perundungan Digital)", "Phishing", "Spamming", "Debugging"],
+                answer: 0,
+                explanation: "Cyberbullying adalah perundungan menggunakan teknologi digital di media sosial, grup pesan, game, dll."
+            },
+            // 45. LD - Dampak Psikologis Cyberbullying (C2)
+            {
+                id: 45, domain: "Literasi Digital", type: "REGULAR", cognitive: "C2",
+                text: "Salah satu dampak psikologis dan sosial yang sangat berbahaya dari korban perundungan digital (cyberbullying) adalah...",
+                options: [
+                    "Mengalami kecemasan tinggi, stres, depresi, menarik diri dari pergaulan, hingga penurunan prestasi belajar.",
+                    "Menjadi lebih populer dan disukai banyak orang di sekolah.",
+                    "Keterampilan koding komputer meningkat pesat.",
+                    "Perangkat smartphone menjadi rusak."
+                ],
+                answer: 0,
+                explanation: "Cyberbullying menyerang kesehatan mental korban, memicu trauma psikologis berat dan isolasi sosial."
+            },
+            // 46. LD - Empati & Toleransi Digital (C2)
+            {
+                id: 46, domain: "Literasi Digital", type: "REGULAR", cognitive: "C2",
+                text: "Penerapan **Empati Digital** di dunia maya dapat diwujudkan melalui perilaku...",
+                options: [
+                    "Memposisikan diri kita di sudut pandang orang lain sebelum menulis komentar agar tidak menyakiti perasaan orang lain.",
+                    "Bebas berkomentar jahat karena tidak bertatap muka langsung.",
+                    "Membuat akun bodong untuk mengkritik teman.",
+                    "Mengabaikan penderitaan korban perundungan."
+                ],
+                answer: 0,
+                explanation: "Empati digital adalah kemampuan memahami dan merasakan situasi perasaan orang lain saat berinteraksi di ruang publik virtual."
+            },
+            // 47. LD - Pemecahan Masalah Cyberbullying (C5 - HOTS)
+            {
+                id: 47, domain: "Literasi Digital", type: "HOTS", cognitive: "C5",
+                visual: `<div class="bg-rose-50 border border-rose-200 p-3 rounded-xl text-xs text-rose-900 space-y-1">
+                    <div class="font-bold flex items-center gap-1"><i class="fa-solid fa-user-slash"></i> Kasus Cyberbullying:</div>
+                    <p>Teman sekelasmu terus-menerus dikirim pesan ejekan fisik di kolom komentar Instagram miliknya hingga merasa takut masuk sekolah.</p>
+                </div>`,
+                text: "Solusi pemecahan masalah paling efektif dan bijak yang harus kamu lakukan sebagai saksi (bystander) yang berempati adalah...",
+                options: [
+                    "Mendampingi korban untuk menyimpan bukti tangkapan layar (screenshot), melakukan *block/report* akun pelaku, dan melaporkan kejadian kepada Guru BK/Guru Budi Winarno, S.Kom.",
+                    "Ikut-ikutan menulis komentar ejekan agar dianggap keren oleh geng sekolah.",
+                    "Menyarankan korban untuk membalas dendam dengan mengejek balik fisik pelaku.",
+                    "Mendiamkan saja karena merasa bukan urusan pribadi."
+                ],
+                answer: 0,
+                explanation: "Tindakan proaktif penanganan cyberbullying: kumpulkan bukti, blokir pelaku, dukung korban secara psikologis, dan laporkan ke otoritas sekolah/orang tua."
+            },
+            // 48. LD - Keamanan Kata Sandi (C2)
+            {
+                id: 48, domain: "Literasi Digital", type: "REGULAR", cognitive: "C2",
+                text: "Kriteria kata sandi (password) akun digital yang kuat dan aman dari retasan (hacking) adalah...",
+                options: [
+                    "Kombinasi minimal 8-12 karakter yang terdiri dari huruf kapital, huruf kecil, angka, dan simbol unik (contoh: `SmpN2#Ngdrj26`).",
+                    "Tanggal lahir sendiri (contoh: `12082011`).",
+                    "Deret angka berurutan `12345678`.",
+                    "Nama depan siswa saja."
+                ],
+                answer: 0,
+                explanation: "Password kuat menggabungkan variasi jenis karakter dan panjang minimal untuk menyulitkan metode brute force."
+            },
+            // 49. LD - Presentasi Digital Integrasi (C3)
+            {
+                id: 49, domain: "Literasi Digital", type: "REGULAR", cognitive: "C3",
+                text: "Saat menyusun laporan presentasi di Microsoft PowerPoint, fitur yang digunakan untuk memasukkan grafik data yang terhubung langsung dengan Microsoft Excel dinamakan...",
+                options: ["Insert Chart / OLE Object Integration", "Mail Merge", "Page Setup", "Hyperlink Text"],
+                answer: 0,
+                explanation: "Integrasi konten antar aplikasi (seperti Excel ke PPT/Word) dilakukan dengan fitur Chart atau Object Linking and Embedding (OLE)."
+            },
+            // 50. LD - Pengamanan Perangkat Malware (C2)
+            {
+                id: 50, domain: "Literasi Digital", type: "REGULAR", cognitive: "C2",
+                text: "Perangkat lunak jahat yang dirancang untuk merusak sistem, mencuri data, atau memata-matai komputer dinamakan **Malware**. Langkah awal pencegahannya adalah...",
+                options: [
+                    "Menginstal Antivirus resmi dan tidak mengunduh file sembarangan dari situs tidak terpercaya.",
+                    "Mematikan fitur Firewall laptop.",
+                    "Membuka semua lampiran email dari pengirim tak dikenal.",
+                    "Menghubungkan flashdisk asing tanpa scan antivirus."
+                ],
+                answer: 0,
+                explanation: "Pencegahan malware membutuhkan Antivirus aktif, pembaharuan sistem berkala, dan kewaspadaan dalam mengunduh file."
+            },
+            // 51. BK - Fungsi Referensi Data VLOOKUP Kolom (C2)
+            {
+                id: 51, domain: "Berpikir Komputasional", type: "REGULAR", cognitive: "C2",
+                text: "Jika rumus `=VLOOKUP(B2, D2:G10, 3, FALSE)` digunakan, nomor `3` menunjukkan bahwa data yang akan diambil berada pada...",
+                options: [
+                    "Kolom ke-3 dari rentang D2:G10 (yaitu kolom F).",
+                    "Baris ke-3 dari tabel D2:G10.",
+                    "Jumlah sel sebanyak 3 buah.",
+                    "Nilai diskon sebesar 3%."
+                ],
+                answer: 0,
+                explanation: "Indeks kolom `3` menghitung kolom ke-3 mulai dari kolom pertama range (D=1, E=2, F=3)."
+            },
+            // 52. BK - Penerapan Peringkasan Data (C3)
+            {
+                id: 52, domain: "Berpikir Komputasional", type: "REGULAR", cognitive: "C3",
+                text: "Dalam laporan keuangan kas kelas VIII, fungsi yang paling tepat untuk menghitung **jumlah total saldo pengeluaran** khusus untuk kategori 'Pembelian Alat Tulis' adalah...",
+                options: ["SUMIF", "COUNT", "MAX", "AVERAGE"],
+                answer: 0,
+                explanation: "SUMIF digunakan untuk menjumlahkan nominal pengeluaran bersyarat (kriteria khusus alat tulis)."
+            },
+            // 53. BK - Konversi Biner Masalah Nyata (C3)
+            {
+                id: 53, domain: "Berpikir Komputasional", type: "REGULAR", cognitive: "C3",
+                text: "Kapasitas file gambar adalah 2 Byte. Karena 1 Byte = 8 Bit, berapa total jumlah Bit dari file gambar tersebut?",
+                options: ["16 Bit", "8 Bit", "32 Bit", "64 Bit"],
+                answer: 0,
+                explanation: "2 Byte = 2 x 8 Bit = 16 Bit."
+            },
+            // 54. LD - Empati Kasus Cyberbullying (C3 - HOTS)
+            {
+                id: 54, domain: "Literasi Digital", type: "HOTS", cognitive: "C3",
+                text: "Ketika mendapati foto editan bernada ejekan tentang guru beredar di grup media sosial, tindakan terbaik siswa yang menjunjung etika digital adalah...",
+                options: [
+                    "Tidak mengunggah ulang, memperingatkan pengirim bahwa tindakan tersebut melanggar hukum etika digital, dan menghapus foto tersebut.",
+                    "Meneruskan foto ke semua teman sekolah agar ramai.",
+                    "Menjadikan foto tersebut sebagai foto profil akun pribadi.",
+                    "Tertawa bahagia di grup."
+                ],
+                answer: 0,
+                explanation: "Menghentikan rantai penyebaran pencemaran nama baik adalah wujud tanggung jawab dan empati etika digital."
+            },
+            // 55. LD - Identifikasi Hoaks (C2)
+            {
+                id: 55, domain: "Literasi Digital", type: "REGULAR", cognitive: "C2",
+                text: "Situs web berdomain resmi yang aman dan terpercaya untuk mencari berita valid mengenai kebijakan pendidikan di Indonesia biasanya berkhas domain...",
+                options: [".go.id atau .kemdikbud.go.id", ".blogspot.com", ".wordpress.com", ".xyz"],
+                answer: 0,
+                explanation: "Domain `.go.id` merupakan domain khusus pemerintah Indonesia yang memiliki validitas hukum tinggi."
+            },
+            // 56. BK - VLOOKUP Kolom ke-2 (C2)
+            {
+                id: 56, domain: "Berpikir Komputasional", type: "REGULAR", cognitive: "C2",
+                visual: `<table class="w-full text-xs text-center border-collapse border border-slate-300">
+                    <tr class="bg-indigo-100 font-bold"><td class="border p-1">NIS</td><td class="border p-1">Nama Siswa</td></tr>
+                    <tr><td class="border p-1">1001</td><td class="border p-1">Ahmad</td></tr>
+                    <tr><td class="border p-1">1002</td><td class="border p-1">Bambang</td></tr>
+                </table>`,
+                text: "Berdasarkan tabel di atas, perintah `=VLOOKUP(1002, A1:B3, 2, FALSE)` akan menghasilkan luaran berupa...",
+                options: ['"Bambang"', '"Ahmad"', '"1002"', '"ERROR"'],
+                answer: 0,
+                explanation: "VLOOKUP mencari NIS 1002 di kolom 1, lalu mengambil data kolom ke-2 yaitu Nama 'Bambang'."
+            },
+            // 57. BK - Queue Loket Bank (C2)
+            {
+                id: 57, domain: "Berpikir Komputasional", type: "REGULAR", cognitive: "C2",
+                text: "Mengapa sistem pencetakan dokumen pada printer (Print Queue) menggunakan prinsipQueue (FIFO)?",
+                options: [
+                    "Agar dokumen yang dikirim paling awal oleh pengguna dicetak terlebih dahulu sesuai urutan pesanan.",
+                    "Agar file paling besar dicetak belakangan.",
+                    "Supaya tinta printer hemat.",
+                    "Agar kertas tidak tersumbat."
+                ],
+                answer: 0,
+                explanation: "Printer memproses tugas cetak sesuai urutan waktu masuknya perintah cetak (FIFO Queue)."
+            },
+            // 58. BK - Konversi Heksadesimal 'A' (C2)
+            {
+                id: 58, domain: "Berpikir Komputasional", type: "REGULAR", cognitive: "C2",
+                text: "Simbol digit 'F' dalam sistem bilangan Heksadesimal mewakili nilai desimal...",
+                options: ["15", "10", "16", "12"],
+                answer: 0,
+                explanation: "Dalam Heksadesimal: A=10, B=11, C=12, D=13, E=14, F=15."
+            },
+            // 59. LD - Perlindungan NIK & Rekening (C4 - HOTS)
+            {
+                id: 59, domain: "Literasi Digital", type: "HOTS", cognitive: "C4",
+                text: "Kejahatan cyber *Phishing* sering memancing korban mengisi formulir palsu untuk mencuri NIK dan nomor rekening. Upaya antisipasi terbaik adalah...",
+                options: [
+                    "Selalu mengecek kepastian URL situs (menggunakan protokol `https://`), tidak sembarangan mengklik link misterius, dan mengaktifkan Otentikasi Dua Faktor (2FA).",
+                    "Mengisi formulir menggunakan komputer warnet.",
+                    "Membagikan password ke teman dekat.",
+                    "Menyimpan password di status WhatsApp."
+                ],
+                answer: 0,
+                explanation: "Keamanan dari phishing dicapai lewat kewaspadaan URL https, 2FA, dan perlindungan kerahasiaan kredensial."
+            },
+            // 60. LD - Respon Bijak Netizen (C5 - HOTS)
+            {
+                id: 60, domain: "Literasi Digital", type: "HOTS", cognitive: "C5",
+                text: "Saat postingan hasil karya senimu dikritik secara tidak pedas oleh netizen di forum online, respon berorientasi mindfulness digital adalah...",
+                options: [
+                    "Menanggapi kritik yang membangun dengan kepala dingin dan santun, serta mengabaikan ujaran kebencian tanpa terpancing emosi berlebihan.",
+                    "Membalas dengan caci maki dan ancaman fisik.",
+                    "Melakukan spamming di akun kritikus tersebut.",
+                    "Menghapus seluruh akun media sosial milik sekolah."
+                ],
+                answer: 0,
+                explanation: "Mindfulness digital melatih kesadaran emosi mandiri, menyikapi masukan secara bijak, dan tidak reaktif terhadap komentar negatif."
+            }
+        ];
+
+
+        /* ==========================================================================
+           STATE MANAGEMENT & APP VARIABLES
+           ========================================================================== */
+        const EXAM_CONFIG = {
+            TOTAL_QUESTIONS: 50,
+            REGULAR_COUNT: 40,
+            HOTS_COUNT: 10,
+            KKTP: 80,
+            DURATION_MINUTES: 90,
+            MIN_SUBMIT_MINUTES: 20
+        };
+
+        let currentStudent = { name: "", class: "", absent: "" };
+        let activeQuestions = []; // 50 questions selected & shuffled
+        let studentAnswers = {};   // { qIndex: { choice: optIdx, isDoubtful: bool } }
+        let currentQuestionIndex = 0;
+
+        let examStartTime = null;
+        let countdownTimerId = null;
+        let realClockTimerId = null;
+        let remainingSeconds = EXAM_CONFIG.DURATION_MINUTES * 60;
+        let elapsedSeconds = 0;
+        let violationCount = 0;
+        let isExamActive = false;
+
+        let audioCtx = null;
+
+        /* ==========================================================================
+           INITIALIZATION & LIFECYCLE
+           ========================================================================== */
+        window.onload = function() {
+            startRealtimeClock();
+            registerSecurityListeners();
+            registerTeacherShortcuts();
+            checkResumeState();
+        };
+
+        function startRealtimeClock() {
+            const updateClock = () => {
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString('id-ID', { hour12: false }) + ' WIB';
+                const dateStr = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
+                document.getElementById('realtime-clock').innerText = timeStr;
+                document.getElementById('current-date').innerText = dateStr;
+            };
+            updateClock();
+            realClockTimerId = setInterval(updateClock, 1000);
+        }
+
+        /* ==========================================================================
+           START EXAM & SHUFFLING ALGORITHM
+           ========================================================================== */
+        function startExam(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('student-name').value.trim();
+            const className = document.getElementById('student-class').value;
+            const absent = document.getElementById('student-absent').value;
+
+            if (!name || !className || !absent) {
+                alert("Harap lengkapi seluruh identitas peserta ujian!");
+                return;
+            }
+
+            currentStudent = { name, class: className, absent };
+            document.getElementById('display-student-name').innerText = name;
+            document.getElementById('display-student-class').innerText = `${className} / No. ${absent}`;
+
+            // Fullscreen Request
+            requestFullscreenMode();
+
+            // Prepare 50 Shuffled Questions (40 Reguler + 10 HOTS)
+            prepareQuestions();
+
+            // UI Transition
+            document.getElementById('screen-login').classList.add('hidden');
+            document.getElementById('screen-exam').classList.remove('hidden');
+            document.getElementById('exam-timer-container').classList.remove('hidden');
+            document.getElementById('violation-badge').classList.remove('hidden');
+
+            isExamActive = true;
+            examStartTime = new Date();
+
+            // Render
+            renderQuestion(0);
+            renderQuestionGrid();
+
+            // Start Timer
+            startCountdownTimer();
+        }
+
+        function prepareQuestions() {
+            const regularPool = QUESTION_BANK.filter(q => q.type === "REGULAR");
+            const hotsPool = QUESTION_BANK.filter(q => q.type === "HOTS");
+
+            const shuffledRegular = shuffleArray([...regularPool]).slice(0, EXAM_CONFIG.REGULAR_COUNT);
+            const shuffledHots = shuffleArray([...hotsPool]).slice(0, EXAM_CONFIG.HOTS_COUNT);
+
+            let combined = shuffleArray([...shuffledRegular, ...shuffledHots]);
+
+            activeQuestions = combined.map(q => {
+                const originalOptions = [...q.options];
+                const correctAnswerText = originalOptions[q.answer];
+                const shuffledOptions = shuffleArray([...originalOptions]);
+                const newCorrectIndex = shuffledOptions.indexOf(correctAnswerText);
+
+                return {
+                    ...q,
+                    options: shuffledOptions,
+                    answer: newCorrectIndex,
+                    originalCorrectText: correctAnswerText
+                };
+            });
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        /* ==========================================================================
+           QUESTION RENDERING & NAVIGATION
+           ========================================================================== */
+        function renderQuestion(index) {
+            currentQuestionIndex = index;
+            const q = activeQuestions[index];
+
+            // Badges
+            document.getElementById('question-number-badge').innerText = `Soal ${String(index + 1).padStart(2, '0')}`;
+            document.getElementById('question-topic-badge').innerText = q.domain;
+
+            const typeBadge = document.getElementById('question-type-badge');
+            if (q.type === 'HOTS') {
+                typeBadge.innerText = `Soal HOTS (${q.cognitive})`;
+                typeBadge.className = 'bg-rose-100 text-rose-700 text-xs font-bold px-3 py-1 rounded-lg border border-rose-300 animate-pulse';
+            } else {
+                typeBadge.innerText = `PG Reguler (${q.cognitive})`;
+                typeBadge.className = 'bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-lg border border-blue-200';
+            }
+
+            // Text
+            document.getElementById('question-text').innerHTML = q.text;
+
+            // Visual
+            const visualContainer = document.getElementById('question-visual');
+            if (q.visual) {
+                visualContainer.innerHTML = q.visual;
+                visualContainer.classList.remove('hidden');
+            } else {
+                visualContainer.innerHTML = '';
+                visualContainer.classList.add('hidden');
+            }
+
+            // Options
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            const currentChoice = studentAnswers[index]?.choice;
+            const optionLabels = ['A', 'B', 'C', 'D'];
+
+            q.options.forEach((optText, optIdx) => {
+                const isSelected = currentChoice === optIdx;
+                const optElement = document.createElement('div');
+                optElement.onclick = () => selectOption(index, optIdx);
+                optElement.className = `flex items-center p-3.5 rounded-xl border-2 cursor-pointer transition transform active:scale-[0.99] ${
+                    isSelected 
+                    ? 'border-indigo-600 bg-indigo-50/80 text-indigo-900 font-semibold shadow-sm' 
+                    : 'border-slate-200 hover:border-indigo-300 hover:bg-slate-50 text-slate-700'
+                }`;
+
+                optElement.innerHTML = `
+                    <div class="w-7 h-7 rounded-lg font-bold text-xs flex items-center justify-center mr-3 transition ${
+                        isSelected ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-600'
+                    }">
+                        ${optionLabels[optIdx]}
+                    </div>
+                    <div class="text-xs md:text-sm leading-snug flex-grow">${optText}</div>
+                `;
+                optionsContainer.appendChild(optElement);
+            });
+
+            // Navigation buttons
+            document.getElementById('btn-prev').disabled = index === 0;
+            document.getElementById('btn-prev').style.opacity = index === 0 ? '0.5' : '1';
+
+            if (index === EXAM_CONFIG.TOTAL_QUESTIONS - 1) {
+                document.getElementById('btn-next').innerText = 'Kembali ke No. 1';
+            } else {
+                document.getElementById('btn-next').innerHTML = 'Selanjutnya <i class="fa-solid fa-chevron-right"></i>';
+            }
+
+            // Doubtful toggle
+            const isDoubtful = !!studentAnswers[index]?.isDoubtful;
+            const btnDoubtful = document.getElementById('btn-doubtful');
+            if (isDoubtful) {
+                btnDoubtful.className = "px-5 py-2.5 rounded-xl bg-amber-500 text-white border border-amber-600 font-bold text-sm transition flex items-center gap-2 shadow";
+            } else {
+                btnDoubtful.className = "px-5 py-2.5 rounded-xl bg-amber-100 text-amber-800 hover:bg-amber-200 border border-amber-300 font-semibold text-sm transition flex items-center gap-2";
+            }
+
+            renderQuestionGrid();
+            saveStateToLocalStorage();
+        }
+
+        function selectOption(qIndex, optionIndex) {
+            if (!studentAnswers[qIndex]) {
+                studentAnswers[qIndex] = { choice: null, isDoubtful: false };
+            }
+            studentAnswers[qIndex].choice = optionIndex;
+            renderQuestion(qIndex);
+        }
+
+        function toggleDoubtful() {
+            if (!studentAnswers[currentQuestionIndex]) {
+                studentAnswers[currentQuestionIndex] = { choice: null, isDoubtful: false };
+            }
+            studentAnswers[currentQuestionIndex].isDoubtful = !studentAnswers[currentQuestionIndex].isDoubtful;
+            renderQuestion(currentQuestionIndex);
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) renderQuestion(currentQuestionIndex - 1);
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < EXAM_CONFIG.TOTAL_QUESTIONS - 1) {
+                renderQuestion(currentQuestionIndex + 1);
+            } else {
+                renderQuestion(0);
+            }
+        }
+
+        function renderQuestionGrid() {
+            const gridContainer = document.getElementById('question-grid');
+            gridContainer.innerHTML = '';
+            let answeredCount = 0;
+
+            for (let i = 0; i < EXAM_CONFIG.TOTAL_QUESTIONS; i++) {
+                const ans = studentAnswers[i];
+                const hasAnswered = ans && ans.choice !== null;
+                const isDoubtful = ans && ans.isDoubtful;
+                const isActive = i === currentQuestionIndex;
+
+                if (hasAnswered) answeredCount++;
+
+                let bgClass = "bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200";
+                if (hasAnswered) {
+                    bgClass = "bg-indigo-600 text-white border-indigo-600";
+                }
+                if (isDoubtful) {
+                    bgClass = "bg-amber-400 text-amber-950 font-bold border-amber-500";
+                }
+
+                const btn = document.createElement('button');
+                btn.onclick = () => renderQuestion(i);
+                btn.className = `h-9 rounded-lg font-bold text-xs flex items-center justify-center border transition ${bgClass} ${
+                    isActive ? 'ring-2 ring-indigo-900 ring-offset-1 font-black scale-105' : ''
+                }`;
+                btn.innerText = String(i + 1).padStart(2, '0');
+                gridContainer.appendChild(btn);
+            }
+
+            document.getElementById('answered-count-text').innerText = `${answeredCount} / ${EXAM_CONFIG.TOTAL_QUESTIONS}`;
+        }
+
+
+        /* ==========================================================================
+           TIMER & 20 MINUTE MINIMUM SUBMIT RULE
+           ========================================================================== */
+        function startCountdownTimer() {
+            countdownTimerId = setInterval(() => {
+                remainingSeconds--;
+                elapsedSeconds++;
+
+                const mins = Math.floor(remainingSeconds / 60);
+                const secs = remainingSeconds % 60;
+                const timerDisplay = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+                const timerElem = document.getElementById('countdown-timer');
+                timerElem.innerText = timerDisplay;
+
+                if (remainingSeconds <= 300) {
+                    timerElem.classList.add('text-rose-300', 'animate-pulse');
+                }
+
+                updateMinTimeRule();
+
+                if (remainingSeconds <= 0) {
+                    clearInterval(countdownTimerId);
+                    alert("Waktu ujian telah habis! Jawaban Anda otomatis dikumpulkan.");
+                    finishExam();
+                }
+
+                saveStateToLocalStorage();
+            }, 1000);
+        }
+
+        function updateMinTimeRule() {
+            const minRequiredSecs = EXAM_CONFIG.MIN_SUBMIT_MINUTES * 60;
+            const submitBtn = document.getElementById('btn-finish-exam');
+            const tooltip = document.getElementById('min-time-tooltip');
+
+            if (elapsedSeconds >= minRequiredSecs) {
+                submitBtn.disabled = false;
+                submitBtn.className = "w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl text-sm shadow-lg hover:shadow-xl transition transform active:scale-95 cursor-pointer";
+                tooltip.innerText = "Siap untuk dikumpulkan";
+                tooltip.className = "text-[10px] font-semibold text-emerald-100 mt-0.5";
+            } else {
+                const waitSecs = minRequiredSecs - elapsedSeconds;
+                const wMins = Math.floor(waitSecs / 60);
+                const wSecs = waitSecs % 60;
+                submitBtn.disabled = true;
+                tooltip.innerText = `Tunggu ${String(wMins).padStart(2, '0')}:${String(wSecs).padStart(2, '0')} lagi`;
+            }
+        }
+
+
+        /* ==========================================================================
+           SECURITY & ANTI-CHEAT LISTENERS
+           ========================================================================== */
+        function requestFullscreenMode() {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen().catch(err => console.log(err));
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+            }
+        }
+
+        function registerSecurityListeners() {
+            document.addEventListener('contextmenu', e => e.preventDefault());
+            document.addEventListener('copy', e => e.preventDefault());
+            document.addEventListener('cut', e => e.preventDefault());
+
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden && isExamActive) triggerViolation();
+            });
+
+            window.addEventListener('blur', () => {
+                if (isExamActive) triggerViolation();
+            });
+
+            document.addEventListener('fullscreenchange', () => {
+                if (!document.fullscreenElement && isExamActive) triggerViolation();
+            });
+        }
+
+        function triggerViolation() {
+            if (!isExamActive) return;
+            violationCount++;
+            document.getElementById('violation-count').innerText = violationCount;
+            document.getElementById('modal-violation-count').innerText = violationCount;
+
+            playBeepSound();
+
+            if (violationCount >= 3) {
+                alert("Pelanggaran CBT mencapai 3 kali! Ujian dihentikan dan jawaban otomatis dikumpulkan.");
+                dismissViolationModal();
+                finishExam();
+            } else {
+                document.getElementById('modal-violation').classList.remove('hidden');
+            }
+        }
+
+        function dismissViolationModal() {
+            document.getElementById('modal-violation').classList.add('hidden');
+            requestFullscreenMode();
+        }
+
+        function playBeepSound() {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(660, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.4);
+            } catch(e) {
+                console.log("Audio alert blocked.");
+            }
+        }
+
+        function registerTeacherShortcuts() {
+            document.addEventListener('keydown', (e) => {
+                // Teacher Secret Bypass: Ctrl + Shift + G
+                if (e.ctrlKey && e.shiftKey && e.code === 'KeyG') {
+                    e.preventDefault();
+                    if (isExamActive) {
+                        elapsedSeconds = EXAM_CONFIG.MIN_SUBMIT_MINUTES * 60 + 1;
+                        updateMinTimeRule();
+                        alert("[Akses Guru Budi Winarno, S.Kom.]: Bypass batas 20 menit berhasil diaktifkan!");
+                    }
+                }
+            });
+        }
+
+
+        /* ==========================================================================
+           FINISH EXAM & EVALUATION SCORING
+           ========================================================================== */
+        function confirmFinishExam() {
+            const unanswered = EXAM_CONFIG.TOTAL_QUESTIONS - Object.values(studentAnswers).filter(a => a.choice !== null).length;
+            let msg = "Apakah Anda yakin ingin menyelesaikan dan mengumpulkan lembar ujian ini?";
+            if (unanswered > 0) {
+                msg = `Masih ada ${unanswered} soal yang belum dijawab! ` + msg;
+            }
+            if (confirm(msg)) {
+                finishExam();
+            }
+        }
+
+        function finishExam() {
+            isExamActive = false;
+            clearInterval(countdownTimerId);
+
+            let correctCount = 0;
+            let wrongCount = 0;
+            let emptyCount = 0;
+
+            let domainStats = {
+                "Berpikir Komputasional": { total: 0, correct: 0 },
+                "Literasi Digital": { total: 0, correct: 0 },
+                "Soal HOTS (C4-C5)": { total: 0, correct: 0 }
+            };
+
+            activeQuestions.forEach((q, idx) => {
+                const choice = studentAnswers[idx]?.choice;
+                const domain = q.domain || "Informatika";
+
+                if (!domainStats[domain]) domainStats[domain] = { total: 0, correct: 0 };
+                domainStats[domain].total++;
+
+                if (q.type === 'HOTS') {
+                    domainStats["Soal HOTS (C4-C5)"].total++;
+                }
+
+                if (choice === undefined || choice === null) {
+                    emptyCount++;
+                } else if (choice === q.answer) {
+                    correctCount++;
+                    domainStats[domain].correct++;
+                    if (q.type === 'HOTS') domainStats["Soal HOTS (C4-C5)"].correct++;
+                } else {
+                    wrongCount++;
+                }
+            });
+
+            const score = Math.round((correctCount / EXAM_CONFIG.TOTAL_QUESTIONS) * 100);
+            const isPassed = score >= EXAM_CONFIG.KKTP;
+
+            renderResultScreen(score, isPassed, correctCount, wrongCount, domainStats);
+            saveFinalResultToLocalStorage(score, isPassed);
+        }
+
+        function renderResultScreen(score, isPassed, correctCount, wrongCount, domainStats) {
+            document.getElementById('screen-exam').classList.add('hidden');
+            document.getElementById('exam-timer-container').classList.add('hidden');
+            document.getElementById('violation-badge').classList.add('hidden');
+            document.getElementById('screen-result').classList.remove('hidden');
+
+            document.getElementById('result-student-name').innerText = currentStudent.name;
+            document.getElementById('result-student-info').innerText = `Kelas: ${currentStudent.class} | Absen: ${currentStudent.absent}`;
+            document.getElementById('result-score-number').innerText = score;
+
+            const headerBg = document.getElementById('result-header-bg');
+            const statusBadge = document.getElementById('result-status-badge');
+            const kktpMsg = document.getElementById('result-kktp-message');
+
+            if (isPassed) {
+                headerBg.className = "p-6 md:p-8 bg-gradient-to-r from-emerald-600 to-teal-700 text-white text-center relative";
+                statusBadge.innerText = "TUNTAS (MEMENUHI KKTP)";
+                statusBadge.className = "px-4 py-1.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 uppercase shadow-sm";
+                kktpMsg.innerText = `Selamat! Nilai Anda (${score}) berhasil mencapai KKTP mata pelajaran Informatika Kelas VIII yaitu 80.`;
+            } else {
+                headerBg.className = "p-6 md:p-8 bg-gradient-to-r from-rose-600 to-amber-700 text-white text-center relative";
+                statusBadge.innerText = "BELUM TUNTAS (REMEDIAL)";
+                statusBadge.className = "px-4 py-1.5 rounded-full text-xs font-black bg-rose-100 text-rose-800 uppercase shadow-sm";
+                kktpMsg.innerText = `Nilai Anda (${score}) belum mencapai KKTP (80). Silakan menghubungi Bapak Budi Winarno, S.Kom. untuk mengikuti program remedial.`;
+            }
+
+            document.getElementById('stat-correct').innerText = `${correctCount} / 50`;
+            document.getElementById('stat-wrong').innerText = `${wrongCount} / 50`;
+
+            const usedMins = Math.floor(elapsedSeconds / 60);
+            const usedSecs = elapsedSeconds % 60;
+            document.getElementById('stat-time').innerText = `${usedMins}m ${usedSecs}s`;
+            document.getElementById('stat-violations').innerText = `${violationCount} / 3`;
+
+            // Breakdown Rendering
+            const domainContainer = document.getElementById('domain-breakdown');
+            domainContainer.innerHTML = '';
+
+            for (const [domainName, stat] of Object.entries(domainStats)) {
+                if (stat.total === 0) continue;
+                const pct = Math.round((stat.correct / stat.total) * 100);
+                const card = document.createElement('div');
+                card.className = "bg-white p-4 rounded-xl border border-slate-200 space-y-2 shadow-sm";
+                card.innerHTML = `
+                    <div class="text-xs font-bold text-slate-700">${domainName}</div>
+                    <div class="flex justify-between items-center text-xs font-semibold text-slate-500">
+                        <span>${stat.correct} dari ${stat.total} Benar</span>
+                        <span class="${pct >= 80 ? 'text-emerald-600' : 'text-amber-600'}">${pct}%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                        <div class="h-full ${pct >= 80 ? 'bg-emerald-500' : 'bg-amber-500'}" style="width: ${pct}%"></div>
+                    </div>
+                `;
+                domainContainer.appendChild(card);
+            }
+
+            renderReviewSection();
+        }
+
+        function renderReviewSection() {
+            const container = document.getElementById('review-container');
+            container.innerHTML = '';
+
+            const optionLabels = ['A', 'B', 'C', 'D'];
+
+            activeQuestions.forEach((q, idx) => {
+                const choice = studentAnswers[idx]?.choice;
+                const isCorrect = choice === q.answer;
+                const isUnanswered = choice === undefined || choice === null;
+
+                const item = document.createElement('div');
+                item.className = `p-4 rounded-xl border ${
+                    isCorrect ? 'bg-emerald-50/50 border-emerald-200' : 'bg-rose-50/50 border-rose-200'
+                } space-y-3`;
+
+                let statusBadge = isCorrect 
+                    ? `<span class="bg-emerald-600 text-white text-[10px] font-bold px-2.5 py-1 rounded">BENAR</span>`
+                    : (isUnanswered ? `<span class="bg-slate-500 text-white text-[10px] font-bold px-2.5 py-1 rounded">KOSONG</span>` : `<span class="bg-rose-600 text-white text-[10px] font-bold px-2.5 py-1 rounded">SALAH</span>`);
+
+                let visualHtml = q.visual ? `<div class="bg-white p-3 rounded-lg border border-slate-200 overflow-x-auto my-2">${q.visual}</div>` : '';
+
+                let optionsListHtml = q.options.map((opt, oIdx) => {
+                    let optStyle = "text-slate-600";
+                    if (oIdx === q.answer) optStyle = "text-emerald-700 font-bold bg-emerald-100/70 px-2 py-0.5 rounded";
+                    if (oIdx === choice && !isCorrect) optStyle = "text-rose-700 font-bold bg-rose-100/70 px-2 py-0.5 rounded line-through";
+
+                    return `<div class="text-xs ${optStyle}"><strong>${optionLabels[oIdx]}.</strong> ${opt}</div>`;
+                }).join('');
+
+                item.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-slate-200/60 pb-2">
+                        <span class="font-bold text-xs text-slate-700">Soal #${idx + 1} • ${q.domain} (${q.cognitive})</span>
+                        ${statusBadge}
+                    </div>
+                    <div class="text-xs md:text-sm text-slate-800 font-medium">${q.text}</div>
+                    ${visualHtml}
+                    <div class="space-y-1 pt-1">${optionsListHtml}</div>
+                    <div class="bg-white/80 p-3 rounded-lg border border-slate-200 text-xs text-slate-600 space-y-1">
+                        <div class="font-bold text-slate-700"><i class="fa-solid fa-lightbulb text-amber-500 mr-1"></i> Pembahasan:</div>
+                        <p>${q.explanation}</p>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function toggleReviewSection() {
+            const sec = document.getElementById('section-review');
+            const btnText = document.getElementById('btn-toggle-review-text');
+            if (sec.classList.contains('hidden')) {
+                sec.classList.remove('hidden');
+                btnText.innerText = 'Sembunyikan Pembahasan';
+                sec.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                sec.classList.add('hidden');
+                btnText.innerText = 'Lihat Pembahasan Lengkap';
+            }
+        }
+
+
+        /* ==========================================================================
+           LOCAL STORAGE & EXPORTING (CSV, JSON, PRINT)
+           ========================================================================== */
+        function saveStateToLocalStorage() {
+            if (!isExamActive) return;
+            const state = {
+                student: currentStudent,
+                activeQuestions,
+                studentAnswers,
+                currentQuestionIndex,
+                remainingSeconds,
+                elapsedSeconds,
+                violationCount
+            };
+            localStorage.setItem('cbt_active_session_v8', JSON.stringify(state));
+        }
+
+        function checkResumeState() {
+            const saved = localStorage.getItem('cbt_active_session_v8');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    if (data && data.student && data.student.name && confirm("Ditemukan sesi ujian Kelas VIII yang belum selesai atas nama " + data.student.name + ". Lanjutkan sesi?")) {
+                        currentStudent = data.student;
+                        activeQuestions = data.activeQuestions;
+                        studentAnswers = data.studentAnswers;
+                        currentQuestionIndex = data.currentQuestionIndex || 0;
+                        remainingSeconds = data.remainingSeconds;
+                        elapsedSeconds = data.elapsedSeconds;
+                        violationCount = data.violationCount || 0;
+
+                        document.getElementById('display-student-name').innerText = currentStudent.name;
+                        document.getElementById('display-student-class').innerText = `${currentStudent.class} / No. ${currentStudent.absent}`;
+                        document.getElementById('violation-count').innerText = violationCount;
+
+                        document.getElementById('screen-login').classList.add('hidden');
+                        document.getElementById('screen-exam').classList.remove('hidden');
+                        document.getElementById('exam-timer-container').classList.remove('hidden');
+                        document.getElementById('violation-badge').classList.remove('hidden');
+
+                        isExamActive = true;
+                        renderQuestion(currentQuestionIndex);
+                        startCountdownTimer();
+                    } else {
+                        localStorage.removeItem('cbt_active_session_v8');
+                    }
+                } catch(e) {
+                    localStorage.removeItem('cbt_active_session_v8');
+                }
+            }
+        }
+
+        function saveFinalResultToLocalStorage(score, isPassed) {
+            localStorage.removeItem('cbt_active_session_v8');
+
+            const results = JSON.parse(localStorage.getItem('cbt_all_results_v8') || '[]');
+            const record = {
+                timestamp: new Date().toLocaleString('id-ID'),
+                student: currentStudent,
+                score,
+                status: isPassed ? 'TUNTAS' : 'REMEDIAL',
+                violations: violationCount,
+                elapsed: `${Math.floor(elapsedSeconds / 60)}m ${elapsedSeconds % 60}s`
+            };
+            results.push(record);
+            localStorage.setItem('cbt_all_results_v8', JSON.stringify(results));
+        }
+
+        function showSavedResultsModal() {
+            const tbody = document.getElementById('saved-results-tbody');
+            tbody.innerHTML = '';
+
+            const results = JSON.parse(localStorage.getItem('cbt_all_results_v8') || '[]');
+            if (results.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Belum ada rekap nilai tersimpan di perangkat ini.</td></tr>`;
+            } else {
+                results.forEach(res => {
+                    const tr = document.createElement('tr');
+                    tr.className = "border-b hover:bg-slate-50";
+                    tr.innerHTML = `
+                        <td class="p-2 border">${res.timestamp}</td>
+                        <td class="p-2 border font-bold">${res.student.name}</td>
+                        <td class="p-2 border">${res.student.class}</td>
+                        <td class="p-2 border text-center">${res.student.absent}</td>
+                        <td class="p-2 border font-extrabold text-center">${res.score}</td>
+                        <td class="p-2 border text-center">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${res.status === 'TUNTAS' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+                                ${res.status}
+                            </span>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+            document.getElementById('modal-saved-results').classList.remove('hidden');
+        }
+
+        function hideSavedResultsModal() {
+            document.getElementById('modal-saved-results').classList.add('hidden');
+        }
+
+        function clearLocalStorageResults() {
+            if (confirm("Apakah Anda yakin ingin menghapus seluruh rekap nilai tersimpan di perangkat ini?")) {
+                localStorage.removeItem('cbt_all_results_v8');
+                showSavedResultsModal();
+            }
+        }
+
+        function downloadCSV() {
+            const results = JSON.parse(localStorage.getItem('cbt_all_results_v8') || '[]');
+            if (results.length === 0) {
+                alert("Tidak ada data rekap nilai untuk diunduh!");
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,Waktu,Nama Siswa,Kelas,No Absen,Skor,Status KKTP,Pelanggaran,Waktu Tempuh\n";
+            results.forEach(r => {
+                csvContent += `"${r.timestamp}","${r.student.name}","${r.student.class}","${r.student.absent}",${r.score},"${r.status}",${r.violations},"${r.elapsed}"\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Rekap_Nilai_CBT_Informatika_Kelas8_SMPN2Ngadirejo.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function downloadJSON() {
+            const results = JSON.parse(localStorage.getItem('cbt_all_results_v8') || '[]');
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(results, null, 2));
+            const link = document.createElement("a");
+            link.setAttribute("href", dataStr);
+            link.setAttribute("download", `Rekap_Nilai_CBT_Informatika_Kelas8.json`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
